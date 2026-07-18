@@ -78,7 +78,7 @@ export function HeroSection() {
 
           <div className="flex justify-center space-x-6">
             <a
-              href="https://github.com/tebriz993"
+              href="https://github.com/latifovtebriz"
               className="text-muted-foreground hover:text-primary transition-colors"
               target="_blank"
               rel="noopener noreferrer"

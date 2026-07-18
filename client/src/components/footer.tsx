@@ -14,7 +14,7 @@ export function Footer() {
           </div>
           <div className="flex justify-center space-x-6 mb-8">
             <a
-              href="https://github.com/tebriz993"
+              href="https://github.com/latifovtebriz"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-400 hover:text-white transition-colors"

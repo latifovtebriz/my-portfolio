@@ -21,7 +21,7 @@ const staticProjects = [
     description: "Modern microservices-based e-commerce platform with distributed architecture.",
     image: ecommerceImage,
     technologies: ["C#", ".NET", "REST API", "RabbitMQ", "Elasticsearch", "Redis"],
-    githubUrl: "https://github.com/tebriz993/ECommerceMicroservice",
+    githubUrl: "https://github.com/latifovtebriz/ECommerceMicroservice",
     liveUrl: null,
     status: "Pending",
     featured: true
@@ -32,7 +32,7 @@ const staticProjects = [
     description: "A comprehensive platform for searching and managing job applications.",
     image: jobSearchImage,
     technologies: ["C#", ".NET", "RestAPI", "Clean Architecture"],
-    githubUrl: "https://github.com/tebriz993/JobSearch-App",
+    githubUrl: "https://github.com/latifovtebriz/JobSearch-App",
     liveUrl: null,
     status: "Featured",
     featured: true
@@ -43,7 +43,7 @@ const staticProjects = [
     description: "A project for the Software Village course, demonstrating core software principles.",
     image: softwareVillageImage,
     technologies: ["C#", ".NET Core MVC", "MVVM", "MVC Architecture"],
-    githubUrl: "https://github.com/tebriz993/SoftwareVillage",
+    githubUrl: "https://github.com/latifovtebriz/SoftwareVillage",
     liveUrl: null,
     status: "Featured",
     featured: true
@@ -54,7 +54,7 @@ const staticProjects = [
     description: "A healthcare system project designed to manage patient and clinical data efficiently.",
     image: dendClubImage,
     technologies: ["C#", ".NET", "RestAPI", "JavaScript", "TypeScript", "React.js"],
-    githubUrl: "https://github.com/tebriz993/DendClub",
+    githubUrl: "https://github.com/latifovtebriz/DendClub",
     liveUrl: null,
     status: "Featured",
     featured: true
@@ -65,7 +65,7 @@ const staticProjects = [
     description: "A full-featured e-commerce application built with an N-layer architecture.",
     image: ecommerceAppImage,
     technologies: ["C#", ".NET", ".NET MVC", "MVVM", "N-layer Architecture", "jQuery"],
-    githubUrl: "https://github.com/tebriz993/ECommerceApp",
+    githubUrl: "https://github.com/latifovtebriz/ECommerceApp",
     liveUrl: null,
     status: "Featured",
     featured: true
@@ -76,7 +76,7 @@ const staticProjects = [
     description: "A specialized application designed to assist legal professionals and law firms.",
     image: lawProjectImage,
     technologies: ["C#", ".NET Core MVC", "MVVM"],
-    githubUrl: "https://github.com/tebriz993/Law_Project",
+    githubUrl: "https://github.com/latifovtebriz/Law_Project",
     liveUrl: null,
     status: "Featured",
     featured: true
@@ -87,7 +87,7 @@ const staticProjects = [
     description: "A corporate e-commerce solution with Onion Architecture and Elasticsearch.",
     image: shopECommerceImage,
     technologies: ["C#", ".NET", "RestAPI", "Onion Architecture", "ElasticSearch"],
-    githubUrl: "https://github.com/tebriz993/ShopECommerce",
+    githubUrl: "https://github.com/latifovtebriz/ShopECommerce",
     liveUrl: null,
     status: "Featured",
     featured: true
