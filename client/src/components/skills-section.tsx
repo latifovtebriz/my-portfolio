@@ -1,208 +1,240 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Server, Code, Cloud, Database, ChevronDown, ChevronUp } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { 
-  SiSharp, SiDotnet, SiReact, SiJavascript, SiTypescript, 
-  SiTailwindcss, SiDocker, SiKubernetes, SiAmazon, 
-  SiMongodb, SiPostgresql, 
-  SiRedis, SiMysql, SiGit, SiGithub, 
-  SiPostman, SiSwagger, SiRabbitmq, SiApachekafka, SiElasticsearch,
-  SiNodedotjs, SiExpress, SiVuedotjs, SiAngular, SiBootstrap,
-  SiMui, SiNextdotjs, SiNuxtdotjs, SiSqlite, SiOracle,
-  SiFirebase, SiSupabase, SiGraphql,
-  SiApollographql, SiJenkins, SiGitlab, SiNginx, SiLinux,
-  SiTerraform, SiGrafana
+  Brain, Bot, Sparkles, Server, Cloud, Database, 
+  Workflow, GitBranch, Terminal, Layers, Cpu, 
+  CheckCircle2, ChevronDown, ChevronUp, TestTube2, Network
+} from "lucide-react";
+import { 
+  SiSharp, SiDotnet, SiPython, SiFastapi, SiFlask, SiPandas, SiNumpy,
+  SiOpenai, SiAnthropic, SiDocker, SiKubernetes, SiTerraform, SiAnsible,
+  SiPrometheus, SiGrafana, SiElasticsearch, SiLinux, SiPostgresql,
+  SiRedis, SiClickhouse, SiOracle, SiRabbitmq, SiApachekafka, SiGit, SiMlflow
 } from "react-icons/si";
 
-// Technologies I Work With - Visual Icons
-const technologies = [
+// Featured Technologies visual bar
+const featuredTechs = [
+  { name: "OpenAI", icon: SiOpenai, color: "text-emerald-500" },
+  { name: "Claude", icon: SiAnthropic, color: "text-amber-600" },
+  { name: "Python", icon: SiPython, color: "text-yellow-500" },
+  { name: "FastAPI", icon: SiFastapi, color: "text-teal-500" },
   { name: "C#", icon: SiSharp, color: "text-purple-600" },
-  { name: ".NET", icon: SiDotnet, color: "text-purple-700" },
-  { name: "React", icon: SiReact, color: "text-blue-500" },
-  { name: "JavaScript", icon: SiJavascript, color: "text-yellow-500" },
-  { name: "TypeScript", icon: SiTypescript, color: "text-blue-600" },
-  { name: "Docker", icon: SiDocker, color: "text-blue-600" },
-  { name: "Kubernetes", icon: SiKubernetes, color: "text-blue-700" },
-  { name: "AWS", icon: SiAmazon, color: "text-orange-500" },
-  { name: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700" },
-  { name: "MS SQL Server", icon: Database, color: "text-red-600" },
-  { name: "RabbitMQ", icon: SiRabbitmq, color: "text-orange-600" },
-  { name: "Redis", icon: SiRedis, color: "text-red-600" },
-  { name: "GraphQL", icon: SiGraphql, color: "text-pink-600" },
-  { name: "Swagger", icon: SiSwagger, color: "text-green-600" },
-  { name: "Terraform", icon: SiTerraform, color: "text-purple-600" },
+  { name: ".NET Core", icon: SiDotnet, color: "text-purple-700" },
+  { name: "Docker", icon: SiDocker, color: "text-blue-500" },
+  { name: "Kubernetes", icon: SiKubernetes, color: "text-blue-600" },
+  { name: "Terraform", icon: SiTerraform, color: "text-indigo-500" },
+  { name: "Prometheus", icon: SiPrometheus, color: "text-orange-500" },
   { name: "Grafana", icon: SiGrafana, color: "text-orange-600" },
-  { name: "Azure", icon: SiAmazon, color: "text-blue-600" },
-  { name: "Apache Kafka", icon: SiApachekafka, color: "text-gray-700" },
-  { name: "ElasticSearch", icon: SiElasticsearch, color: "text-yellow-600" },
+  { name: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700" },
+  { name: "Redis", icon: SiRedis, color: "text-red-500" },
+  { name: "ClickHouse", icon: SiClickhouse, color: "text-yellow-600" },
+  { name: "RabbitMQ", icon: SiRabbitmq, color: "text-orange-600" },
+  { name: "Kafka", icon: SiApachekafka, color: "text-slate-200" },
+  { name: "MLflow", icon: SiMlflow, color: "text-blue-400" },
+  { name: "Linux", icon: SiLinux, color: "text-amber-400" },
 ];
 
-// Define skill categories with progress percentages
-const backendSkills = [
-  { name: "C#", icon: SiSharp, color: "text-purple-600", progress: 95 },
-  { name: ".NET", icon: SiDotnet, color: "text-purple-700", progress: 95 },
-  { name: ".NET Core", icon: SiDotnet, color: "text-purple-500", progress: 90 },
-  { name: "ASP.NET MVC", icon: SiDotnet, color: "text-purple-800", progress: 88 },
-  { name: "Microservices", icon: Server, color: "text-blue-600", progress: 85 },
-  { name: "Onion Architecture", icon: Server, color: "text-blue-800", progress: 85 },
-  { name: "Entity Framework", icon: Database, color: "text-blue-700", progress: 88 },
-  { name: "RabbitMQ", icon: SiRabbitmq, color: "text-orange-600", progress: 75 },
-  { name: "Redis", icon: SiRedis, color: "text-red-600", progress: 70 },
-];
+interface SkillGroup {
+  category: string;
+  icon: any;
+  color: string;
+  badgeVariant?: "default" | "secondary" | "outline";
+  skills: { name: string; highlight?: boolean }[];
+}
 
-const frontendSkills = [
-  { name: "React.js", icon: SiReact, color: "text-blue-500", progress: 85 },
-  { name: "JavaScript", icon: SiJavascript, color: "text-yellow-500", progress: 90 },
-  { name: "TypeScript", icon: SiTypescript, color: "text-blue-600", progress: 80 },
-  { name: "HTML5 & CSS3", icon: Code, color: "text-orange-600", progress: 95 },
-  { name: "Tailwind CSS", icon: SiTailwindcss, color: "text-cyan-500", progress: 85 },
-  { name: "Bootstrap", icon: SiBootstrap, color: "text-purple-600", progress: 85 },
-  { name: "Material UI", icon: SiMui, color: "text-blue-600", progress: 80 },
-  { name: "Redux", icon: SiReact, color: "text-purple-500", progress: 70 },
-  { name: "Next.js", icon: SiNextdotjs, color: "text-black", progress: 55 },
-];
-
-const devopsCloudSkills = [
-  { name: "Azure/AWS", icon: Cloud, color: "text-blue-600", progress: 80 },
-  { name: "Docker", icon: SiDocker, color: "text-blue-600", progress: 85 },
-  { name: "Kubernetes", icon: SiKubernetes, color: "text-blue-700", progress: 75 },
-  { name: "CI/CD Pipelines", icon: Server, color: "text-green-600", progress: 80 },
-  { name: "Git", icon: SiGit, color: "text-orange-600", progress: 95 },
-  { name: "GitHub", icon: SiGithub, color: "text-black", progress: 90 },
-  { name: "GitLab", icon: SiGitlab, color: "text-orange-600", progress: 80 },
-  { name: "Jenkins", icon: SiJenkins, color: "text-blue-800", progress: 75 },
-  { name: "Nginx", icon: SiNginx, color: "text-green-700", progress: 75 },
-  { name: "Linux", icon: SiLinux, color: "text-black", progress: 80 },
-];
-
-const databaseSkills = [
-  { name: "SQL", icon: Database, color: "text-blue-800", progress: 90 },
-  { name: "MS SQL Server", icon: Database, color: "text-blue-800", progress: 90 },
-  { name: "PostgreSQL", icon: SiPostgresql, color: "text-blue-700", progress: 85 },
-  { name: "MySQL", icon: SiMysql, color: "text-blue-600", progress: 85 },
-  { name: "MongoDB", icon: SiMongodb, color: "text-green-600", progress: 70 },
-  { name: "Redis", icon: SiRedis, color: "text-red-600", progress: 70 },
-  { name: "Firebase", icon: SiFirebase, color: "text-yellow-600", progress: 75 },
-];
-
-const teachingSkills = [
-  { name: "Teaching", icon: Code, color: "text-green-600", progress: 85 },
-  { name: "Mentoring", icon: Code, color: "text-blue-600", progress: 80 },
-  { name: "Code Review", icon: Code, color: "text-purple-600", progress: 85 },
-  { name: "Technical Writing", icon: Code, color: "text-orange-600", progress: 75 },
+const skillGroups: SkillGroup[] = [
+  {
+    category: "LLM & AI Engineering",
+    icon: Brain,
+    color: "text-purple-500",
+    skills: [
+      { name: "Prompt Engineering", highlight: true },
+      { name: "RAG (Retrieval-Augmented Generation)", highlight: true },
+      { name: "Embeddings & Vector Search", highlight: true },
+      { name: "Semantic Search", highlight: true },
+      { name: "Tool-using LLM & Agent Workflows", highlight: true },
+      { name: "Model Selection", highlight: false },
+      { name: "OCR & Document Data Extraction", highlight: false },
+      { name: "Self-hosting Open-Source Models (Llama, Mistral)", highlight: true },
+    ],
+  },
+  {
+    category: "LLM Providers & Frameworks",
+    icon: Bot,
+    color: "text-emerald-500",
+    skills: [
+      { name: "OpenAI (GPT-4, ChatGPT API)", highlight: true },
+      { name: "Anthropic Claude", highlight: true },
+      { name: "Llama (Meta)", highlight: true },
+      { name: "Mistral AI", highlight: true },
+      { name: "LangChain", highlight: true },
+      { name: "LlamaIndex", highlight: true },
+    ],
+  },
+  {
+    category: "Vector Databases",
+    icon: Database,
+    color: "text-amber-500",
+    skills: [
+      { name: "Pinecone", highlight: true },
+      { name: "FAISS", highlight: true },
+      { name: "Weaviate", highlight: true },
+    ],
+  },
+  {
+    category: "Evaluation & Experimentation",
+    icon: TestTube2,
+    color: "text-pink-500",
+    skills: [
+      { name: "LLM Output Evaluation (Accuracy, Relevance, Quality)", highlight: true },
+      { name: "Ragas", highlight: true },
+      { name: "MLflow", highlight: true },
+      { name: "A/B Testing of Prompts & Pipelines", highlight: true },
+      { name: "Model Configurations & Benchmarking", highlight: false },
+    ],
+  },
+  {
+    category: "Languages & Frameworks",
+    icon: Terminal,
+    color: "text-blue-500",
+    skills: [
+      { name: "Python", highlight: true },
+      { name: "FastAPI", highlight: true },
+      { name: "Flask", highlight: false },
+      { name: "Pandas", highlight: false },
+      { name: "NumPy", highlight: false },
+      { name: "C#", highlight: true },
+      { name: ".NET Core", highlight: true },
+      { name: "ASP.NET Web API", highlight: true },
+      { name: "ASP.NET MVC", highlight: false },
+    ],
+  },
+  {
+    category: "DevOps & Cloud (SRE)",
+    icon: Cloud,
+    color: "text-cyan-500",
+    skills: [
+      { name: "Azure DevOps", highlight: true },
+      { name: "CI/CD Automation", highlight: true },
+      { name: "Docker", highlight: true },
+      { name: "Kubernetes", highlight: true },
+      { name: "Terraform", highlight: true },
+      { name: "Ansible", highlight: false },
+      { name: "Prometheus", highlight: true },
+      { name: "Grafana", highlight: true },
+      { name: "ELK Stack", highlight: false },
+      { name: "Linux OS", highlight: true },
+    ],
+  },
+  {
+    category: "Databases & Messaging",
+    icon: Network,
+    color: "text-orange-500",
+    skills: [
+      { name: "PostgreSQL", highlight: true },
+      { name: "Microsoft SQL Server", highlight: true },
+      { name: "Redis", highlight: true },
+      { name: "ClickHouse", highlight: true },
+      { name: "Oracle Database", highlight: false },
+      { name: "RabbitMQ", highlight: true },
+      { name: "Kafka", highlight: true },
+    ],
+  },
+  {
+    category: "Architecture & Practices",
+    icon: Layers,
+    color: "text-violet-500",
+    skills: [
+      { name: "Microservice Architecture", highlight: true },
+      { name: "CQRS", highlight: true },
+      { name: "DDD (Domain-Driven Design)", highlight: true },
+      { name: "SRE Practices", highlight: true },
+      { name: "Agile / Scrum", highlight: false },
+      { name: "Git & GitOps", highlight: true },
+    ],
+  },
 ];
 
 export function SkillsSection() {
   const [isExpanded, setIsExpanded] = useState(true);
-
-  const skillCategories = [
-    {
-      title: "Backend Development", 
-      icon: Server,
-      skills: backendSkills,
-      color: "text-purple-600"
-    },
-    {
-      title: "Frontend Development",
-      icon: Code,
-      skills: frontendSkills,
-      color: "text-blue-600"
-    },
-    {
-      title: "DevOps & Cloud",
-      icon: Cloud,
-      skills: devopsCloudSkills,
-      color: "text-green-600"
-    },
-    {
-      title: "Databases",
-      icon: Database,
-      skills: databaseSkills,
-      color: "text-orange-600"
-    },
-    {
-      title: "Teaching & Mentoring",
-      icon: Code,
-      skills: teachingSkills,
-      color: "text-emerald-600"
-    }
-  ];
 
   return (
     <section id="skills" className="section-padding">
       <div className="container-custom">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Technical Skills
-            </h2>
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                Technical Skills
+              </h2>
+              <p className="text-muted-foreground mt-2 text-sm md:text-base">
+                Specialized in Generative AI, LLM systems, scalable microservices, and DevOps/SRE practices.
+              </p>
+            </div>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              {isExpanded ? 'Collapse' : 'Expand'}
+              {isExpanded ? "Collapse" : "Expand"}
             </button>
           </div>
 
           {isExpanded && (
             <div>
-              {/* Technologies I Work With - Visual Icons */}
+              {/* Featured Technologies Visual Icons Bar */}
               <div className="mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">
-                  Technologies I Work With
-                </h3>
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-4 md:gap-6">
-                  {technologies.map((tech, index) => (
-                    <div key={index} className="flex flex-col items-center group">
-                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-800 dark:bg-gray-700 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 mb-2">
-                        <tech.icon className={`w-8 h-8 md:w-10 md:h-10 ${tech.color}`} />
+                <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 gap-3 md:gap-4">
+                  {featuredTechs.map((tech, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-all hover:scale-105 group"
+                    >
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-2">
+                        <tech.icon className={`w-7 h-7 ${tech.color} transition-transform group-hover:scale-110`} />
                       </div>
-                      <span className="text-xs md:text-sm font-medium text-center leading-tight">
+                      <span className="text-xs font-medium text-center truncate max-w-full">
                         {tech.name}
                       </span>
                     </div>
                   ))}
                 </div>
               </div>
-              
-              <div className="grid md:grid-cols-2 gap-8">
-                {skillCategories.map((category, index) => {
-                const IconComponent = category.icon;
-                return (
-                  <Card key={index} className="h-fit">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className={`p-2 rounded-lg bg-muted ${category.color}`}>
-                          <IconComponent className="h-6 w-6" />
+
+              {/* Categorized Skills Grid */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {skillGroups.map((group, index) => {
+                  const Icon = group.icon;
+                  return (
+                    <Card key={index} className="border-border/60 hover:border-primary/40 transition-colors">
+                      <CardContent className="p-6">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className={`p-2.5 rounded-lg bg-muted/60 ${group.color}`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <h3 className="text-lg font-bold">{group.category}</h3>
                         </div>
-                        <h3 className="text-xl font-semibold">{category.title}</h3>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        {category.skills.map((skill, skillIndex) => {
-                          const SkillIcon = skill.icon;
-                          return (
-                            <div key={skillIndex} className="flex items-center gap-3">
-                              <div className={`${skill.color} flex-shrink-0`}>
-                                <SkillIcon className="h-5 w-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-1">
-                                  <span className="text-sm font-medium truncate">{skill.name}</span>
-                                  <span className="text-xs text-muted-foreground">{skill.progress}%</span>
-                                </div>
-                                <Progress value={skill.progress} className="h-2" />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+
+                        <div className="flex flex-wrap gap-2">
+                          {group.skills.map((skill, sIdx) => (
+                            <Badge
+                              key={sIdx}
+                              variant={skill.highlight ? "default" : "secondary"}
+                              className={`text-xs py-1.5 px-3 font-medium transition-colors ${
+                                skill.highlight
+                                  ? "bg-primary/90 hover:bg-primary text-primary-foreground"
+                                  : "bg-muted hover:bg-muted/80 text-foreground"
+                              }`}
+                            >
+                              {skill.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           )}

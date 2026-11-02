@@ -1,15 +1,10 @@
-// client/src/components/hero-section.tsx
-
-// 1. Lazımi komponentləri və kitabxananı import edirik
 import { Button } from "@/components/ui/button";
 import { Github, Linkedin, Mail, Download } from "lucide-react";
 import { TypeAnimation } from "react-type-animation";
 import tabrizPhoto from "@/assets/profile-image.png";
 import { trackEvent } from "@/lib/analytics";
 
-
 export function HeroSection() {
-
   const scrollToContact = () => {
     const element = document.querySelector("#contact");
     if (element) {
@@ -18,12 +13,10 @@ export function HeroSection() {
   };
 
   const downloadCV = () => {
-    // Track CV download event
-    trackEvent('download', 'cv', 'hero_section');
-
-    const link = document.createElement('a');
-    link.href = '/Tabriz Latifov CV.pdf';
-    link.download = 'Tabriz Latifov CV.pdf';
+    trackEvent("download", "cv", "hero_section");
+    const link = document.createElement("a");
+    link.href = "/Tabriz Latifov CV.pdf";
+    link.download = "Tabriz Latifov CV.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -37,21 +30,22 @@ export function HeroSection() {
             <img
               src={tabrizPhoto}
               alt="Tabriz Latifov"
-              className="rounded-full mx-auto w-64 h-64 object-cover border-4 border-background"
+              className="rounded-full mx-auto w-64 h-64 object-cover border-4 border-background shadow-xl"
             />
           </div>
 
-          {/* --- DƏYİŞİKLİK BURADADIR --- */}
-          {/* 2. Köhnə <Badge> komponentini silib, yerinə <TypeAnimation> əlavə edirik */}
-          {/* Mətn dəyişdikcə səhifənin "atlamaması" üçün ona bir min-height veririk */}
           <div className="mb-4 text-xl md:text-2xl font-semibold min-h-[64px] flex items-center justify-center">
             <TypeAnimation
               sequence={[
                 "Hi, I'm Tabriz!",
                 1000,
-                "Software and DevOps Engineer",
-                1000,
-                "Building innovative web solutions",
+                "Generative AI & Software Engineer",
+                1500,
+                "LLMs | RAG | Vector Search | Agent Workflows",
+                1500,
+                "C# / .NET Core & Microservices Architecture",
+                1500,
+                "Cloud Infrastructure, DevOps & SRE",
                 1500,
               ]}
               wrapper="span"
@@ -59,18 +53,16 @@ export function HeroSection() {
               repeat={Infinity}
             />
           </div>
-          {/* --- DƏYİŞİKLİK BİTDİ --- */}
 
-
-          <p className="text-lg mb-8 max-w-2xl mx-auto text-muted-foreground leading-relaxed">
-            A skilled software engineer dedicated to building modern, scalable web solutions. I leverage strong algorithmic thinking to tackle complex challenges and deliver high-quality code.
+          <p className="text-lg mb-8 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
+            Software Engineer with <strong>4+ years of experience</strong> in C# and the .NET ecosystem, microservices architecture, and DevOps practices, plus <strong>2+ years of experience</strong> in Python development and AI/LLM engineering. Proven track record in designing scalable systems, building production-grade RAG pipelines, vector search, and managing cloud infrastructure.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button onClick={scrollToContact} size="lg" className="px-8">
+            <Button onClick={scrollToContact} size="lg" className="px-8 shadow-md">
               Contact Me
             </Button>
-            <Button variant="outline" size="lg" className="px-8" onClick={downloadCV}>
+            <Button variant="outline" size="lg" className="px-8 shadow-sm" onClick={downloadCV}>
               <Download className="mr-2 h-4 w-4" />
               Download CV
             </Button>
@@ -82,7 +74,8 @@ export function HeroSection() {
               className="text-muted-foreground hover:text-primary transition-colors"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackEvent('click', 'social_media', 'github')}
+              aria-label="GitHub Profile"
+              onClick={() => trackEvent("click", "social_media", "github")}
             >
               <Github className="h-6 w-6" />
             </a>
@@ -91,16 +84,16 @@ export function HeroSection() {
               className="text-muted-foreground hover:text-primary transition-colors"
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackEvent('click', 'social_media', 'linkedin')}
+              aria-label="LinkedIn Profile"
+              onClick={() => trackEvent("click", "social_media", "linkedin")}
             >
               <Linkedin className="h-6 w-6" />
             </a>
             <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=latifovtebriz@gmail.com"
+              href="mailto:latifovtebriz@gmail.com"
               className="text-muted-foreground hover:text-primary transition-colors"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('click', 'social_media', 'email')}
+              aria-label="Email"
+              onClick={() => trackEvent("click", "social_media", "email")}
             >
               <Mail className="h-6 w-6" />
             </a>

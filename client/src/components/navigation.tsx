@@ -4,10 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Moon, Sun, Menu, Gamepad2 } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Link } from "wouter";
-
 import { trackEvent } from "@/lib/analytics";
-
-// Navigation items will now use translations
 
 export function Navigation() {
   const { theme, toggleTheme } = useTheme();
@@ -18,13 +15,13 @@ export function Navigation() {
     { href: "#experience", label: "Experience" },
     { href: "#skills", label: "Skills" },
     { href: "#projects", label: "Projects" },
+    { href: "#research", label: "Research" },
+    { href: "#education", label: "Education" },
     { href: "#contact", label: "Contact" },
   ];
 
   const scrollToSection = (href: string) => {
-    // Track navigation clicks
-    trackEvent('navigation', 'click', href.replace('#', ''));
-    
+    trackEvent("navigation", "click", href.replace("#", ""));
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
@@ -43,18 +40,18 @@ export function Navigation() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
+          <div className="hidden md:flex space-x-6 lg:space-x-8">
             {navItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => scrollToSection(item.href)}
-                className="hover:text-primary transition-colors duration-200"
+                className="hover:text-primary transition-colors duration-200 text-sm font-medium"
               >
                 {item.label}
               </button>
             ))}
             <Link to="/games">
-              <button className="flex items-center gap-1 hover:text-primary transition-colors duration-200">
+              <button className="flex items-center gap-1 hover:text-primary transition-colors duration-200 text-sm font-medium">
                 <Gamepad2 className="h-4 w-4" />
                 My Games
               </button>
@@ -66,10 +63,11 @@ export function Navigation() {
               variant="ghost"
               size="icon"
               onClick={() => {
-                trackEvent('theme', 'toggle', theme === 'dark' ? 'to_light' : 'to_dark');
+                trackEvent("theme", "toggle", theme === "dark" ? "to_light" : "to_dark");
                 toggleTheme();
               }}
               className="hover:bg-muted"
+              aria-label="Toggle theme"
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5" />
@@ -81,7 +79,7 @@ export function Navigation() {
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" aria-label="Open menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -91,7 +89,7 @@ export function Navigation() {
                     <button
                       key={item.href}
                       onClick={() => scrollToSection(item.href)}
-                      className="text-left py-2 hover:text-primary transition-colors"
+                      className="text-left py-2 hover:text-primary transition-colors text-base font-medium"
                     >
                       {item.label}
                     </button>
@@ -99,7 +97,7 @@ export function Navigation() {
                   <Link to="/games">
                     <button 
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-2 text-left py-2 hover:text-primary transition-colors"
+                      className="flex items-center gap-2 text-left py-2 hover:text-primary transition-colors text-base font-medium"
                     >
                       <Gamepad2 className="h-4 w-4" />
                       My Games
