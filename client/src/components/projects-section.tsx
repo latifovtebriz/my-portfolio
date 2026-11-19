@@ -129,53 +129,98 @@ const staticProjects = [
 
 export function ProjectsSection() {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [filter, setFilter] = useState<"all" | "ai" | "backend">("all");
+
+  const filteredProjects = staticProjects.filter((p) => {
+    if (filter === "ai") return p.isAi;
+    if (filter === "backend") return !p.isAi;
+    return true;
+  });
 
   return (
-    <section id="projects" className="section-padding bg-muted/40">
+    <section id="projects" className="section-padding relative">
       <div className="container-custom">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <Badge variant="outline" className="mb-2 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+                Showcase
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Featured Projects
               </h2>
-              <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                Autonomous AI agents, workplace automation platforms, and distributed microservices.
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
+                Autonomous AI agents, enterprise workplace automation platforms, and distributed microservices.
               </p>
             </div>
-            <Button
-              variant="ghost"
+            <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all self-start sm:self-auto"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              {isExpanded ? 'Collapse' : 'Expand'}
-            </Button>
+              {isExpanded ? "Collapse" : "Expand"}
+            </button>
+          </div>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap gap-2.5 mb-10">
+            <button
+              onClick={() => setFilter("all")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                filter === "all"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]"
+                  : "bg-card/70 border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
+            >
+              All Projects ({staticProjects.length})
+            </button>
+            <button
+              onClick={() => setFilter("ai")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                filter === "ai"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]"
+                  : "bg-card/70 border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              AI Platforms & Agents
+            </button>
+            <button
+              onClick={() => setFilter("backend")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                filter === "backend"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]"
+                  : "bg-card/70 border border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
+            >
+              Microservices & Architecture
+            </button>
           </div>
 
           {isExpanded && (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {staticProjects.map((project) => (
+              {filteredProjects.map((project) => (
                 <Card 
                   key={project.id} 
-                  className={`group hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden ${
-                    project.isAi ? "border-primary/50 ring-1 ring-primary/20 shadow-sm" : "border-border/60"
+                  className={`glass-panel card-hover-effect rounded-2xl group flex flex-col justify-between overflow-hidden border-border/70 hover:border-primary/50 transition-all duration-300 ${
+                    project.isAi ? "border-primary/40 ring-1 ring-primary/15 shadow-sm" : ""
                   }`}
                 >
                   <div>
-                    <div className="aspect-video overflow-hidden rounded-t-lg bg-muted relative">
+                    <div className="aspect-video overflow-hidden rounded-t-2xl bg-muted relative">
                       <img
                         src={project.image}
                         alt={project.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIyNSIgdmlld0JveD0iMCAwIDQwMCAyMjUiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjI1IiBmaWxsPSIjZjMfNGY2Ii8+CjxwYXRoIGQ9Ik0yMDAgMTEyLjVMMTc1IDg3LjVMMjAwIDYyLjVMMjI1IDg3LjVMMjAwIDExMi41WiIgZmlsbD0iIzk5YTNhZiIvPgo8L3N2Zz4K';
                         }}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60" />
                       {project.isAi && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-primary text-primary-foreground font-semibold flex items-center gap-1 shadow-md">
+                        <div className="absolute top-3 right-3">
+                          <Badge className="bg-primary text-primary-foreground font-semibold flex items-center gap-1 shadow-md shadow-primary/30 backdrop-blur-md">
                             <Sparkles className="h-3 w-3" />
                             AI Platform
                           </Badge>
@@ -183,11 +228,13 @@ export function ProjectsSection() {
                       )}
                     </div>
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-bold text-lg">{project.name}</h3>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <h3 className="font-bold text-lg tracking-tight group-hover:text-primary transition-colors">
+                          {project.name}
+                        </h3>
                         <Badge 
                           variant={project.isAi ? "default" : "outline"}
-                          className="text-xs"
+                          className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
                         >
                           {project.status}
                         </Badge>
@@ -195,9 +242,9 @@ export function ProjectsSection() {
                       <p className="text-muted-foreground text-sm mb-4 line-clamp-3 leading-relaxed">
                         {project.description}
                       </p>
-                      <div className="flex flex-wrap gap-1.5 mb-4">
+                      <div className="flex flex-wrap gap-1.5 mb-2">
                         {project.technologies?.map((tech) => (
-                          <Badge key={tech} variant="secondary" className="text-xs">
+                          <Badge key={tech} variant="secondary" className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-muted/60 border border-border/50">
                             {tech}
                           </Badge>
                         ))}
@@ -205,9 +252,9 @@ export function ProjectsSection() {
                     </CardContent>
                   </div>
 
-                  <div className="p-6 pt-0 flex gap-2">
+                  <div className="p-6 pt-0 flex gap-2.5">
                     {project.githubUrl && (
-                      <Button variant="outline" size="sm" asChild className="flex-1">
+                      <Button variant="outline" size="sm" asChild className="flex-1 rounded-xl bg-card/60 hover:border-primary/50 hover:bg-muted/60 transition-all font-medium">
                         <a
                           href={project.githubUrl}
                           target="_blank"
@@ -220,7 +267,7 @@ export function ProjectsSection() {
                       </Button>
                     )}
                     {project.liveUrl && (
-                      <Button size="sm" asChild className="flex-1">
+                      <Button size="sm" asChild className="flex-1 rounded-xl bg-primary shadow-sm hover:bg-primary/90 font-medium">
                         <a
                           href={project.liveUrl}
                           target="_blank"

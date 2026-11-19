@@ -116,21 +116,24 @@ export function ResearchConferencesSection() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <section id="research" className="section-padding">
+    <section id="research" className="section-padding relative">
       <div className="container-custom">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <Badge variant="outline" className="mb-2 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+                Global Impact
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Research & Global Conferences
               </h2>
-              <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                International scientific papers, space congresses (IAC), and European Erasmus+ / UN delegations.
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
+                International scientific papers, International Astronautical Congresses (IAC), and European Erasmus+ / UN delegations.
               </p>
             </div>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all self-start sm:self-auto"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {isExpanded ? "Collapse" : "Expand"}
@@ -141,31 +144,33 @@ export function ResearchConferencesSection() {
             <div className="space-y-12">
               {/* Scientific Research Subsection */}
               <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <h3 className="text-2xl font-bold">Key Projects & Scientific Research</h3>
+                <div className="flex items-center gap-2.5 mb-6">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Key Projects & Scientific Research</h3>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
                   {scientificResearches.map((res, index) => (
-                    <Card key={index} className="border-border/60 hover:border-primary/50 transition-all hover:shadow-md">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                    <Card key={index} className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all">
+                      <CardContent className="p-6 sm:p-7">
+                        <div className="flex items-start justify-between mb-3.5 gap-2">
+                          <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/25 px-2.5 py-0.5 rounded-full font-medium">
                             {res.tag}
                           </Badge>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="h-3 w-3 inline" /> {res.period}
+                          <span className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium shrink-0">
+                            <Calendar className="h-3.5 w-3.5 inline text-primary/70" /> {res.period}
                           </span>
                         </div>
-                        <h4 className="text-lg font-bold mb-1 leading-snug">{res.title}</h4>
-                        <div className="text-sm font-semibold text-primary mb-1">{res.organization}</div>
-                        <div className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+                        <h4 className="text-lg font-bold mb-1.5 leading-snug tracking-tight">{res.title}</h4>
+                        <div className="text-sm font-semibold text-primary mb-1.5">{res.organization}</div>
+                        <div className="text-xs text-muted-foreground mb-4 flex items-center gap-1.5 flex-wrap">
                           {res.location && (
                             <>
-                              <MapPin className="h-3 w-3 inline" /> {res.location} •
+                              <MapPin className="h-3 w-3 inline text-muted-foreground/80" /> {res.location} •
                             </>
                           )}
-                          <span className="font-medium text-foreground/80">{res.role}</span>
+                          <span className="font-semibold text-foreground/90">{res.role}</span>
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {res.description}
@@ -178,28 +183,30 @@ export function ResearchConferencesSection() {
 
               {/* Global Conferences Subsection */}
               <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <Globe2 className="h-5 w-5 text-primary" />
-                  <h3 className="text-2xl font-bold">Conferences & Global Programs</h3>
+                <div className="flex items-center gap-2.5 mb-6">
+                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                    <Globe2 className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Conferences & Global Programs</h3>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {globalConferences.map((conf, index) => (
-                    <Card key={index} className="border-border/60 hover:border-primary/50 transition-all hover:shadow-md">
+                    <Card key={index} className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all flex flex-col justify-between">
                       <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <Badge variant="secondary" className="text-xs">
+                        <div className="flex items-start justify-between mb-3.5 gap-2">
+                          <Badge variant="secondary" className="text-[11px] px-2.5 py-0.5 rounded-full font-medium bg-muted/70 border border-border/60">
                             {conf.tag}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground font-medium shrink-0">
                             {conf.period}
                           </span>
                         </div>
-                        <h4 className="text-base font-bold mb-2 leading-snug line-clamp-2" title={conf.title}>
+                        <h4 className="text-base font-bold mb-2 leading-snug line-clamp-2 tracking-tight" title={conf.title}>
                           {conf.title}
                         </h4>
-                        <p className="text-xs font-semibold text-primary mb-1">{conf.organization}</p>
-                        <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
-                          <MapPin className="h-3 w-3 inline" /> {conf.location} • {conf.role}
+                        <p className="text-xs font-semibold text-primary mb-1.5">{conf.organization}</p>
+                        <p className="text-xs text-muted-foreground mb-3.5 flex items-center gap-1.5 flex-wrap">
+                          <MapPin className="h-3 w-3 inline text-muted-foreground/80" /> {conf.location} • {conf.role}
                         </p>
                         <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
                           {conf.description}

@@ -167,21 +167,24 @@ export function SkillsSection() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <section id="skills" className="section-padding">
+    <section id="skills" className="section-padding relative">
       <div className="container-custom">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">
-                Technical Skills
+              <Badge variant="outline" className="mb-2 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+                Core Stack
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+                Technical Skills & Tools
               </h2>
-              <p className="text-muted-foreground mt-2 text-sm md:text-base">
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
                 Specialized in Generative AI, LLM systems, scalable microservices, and DevOps/SRE practices.
               </p>
             </div>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all self-start sm:self-auto"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {isExpanded ? "Collapse" : "Expand"}
@@ -191,17 +194,21 @@ export function SkillsSection() {
           {isExpanded && (
             <div>
               {/* Featured Technologies Visual Icons Bar */}
-              <div className="mb-12">
-                <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-9 gap-3 md:gap-4">
+              <div className="mb-12 glass-panel p-6 sm:p-8 rounded-3xl border border-border/70 shadow-sm">
+                <div className="text-xs uppercase tracking-wider font-bold text-muted-foreground mb-5 text-center sm:text-left">
+                  Core Technologies & Frameworks
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-10 gap-3">
                   {featuredTechs.map((tech, index) => (
                     <div
                       key={index}
-                      className="flex flex-col items-center p-3 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-all hover:scale-105 group"
+                      className="flex flex-col items-center p-3 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/50 hover:bg-muted/50 transition-all duration-200 hover:-translate-y-1 hover:shadow-md group cursor-default"
+                      title={tech.name}
                     >
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-2">
-                        <tech.icon className={`w-7 h-7 ${tech.color} transition-transform group-hover:scale-110`} />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1.5">
+                        <tech.icon className={`w-6 h-6 ${tech.color} transition-transform duration-200 group-hover:scale-115`} />
                       </div>
-                      <span className="text-xs font-medium text-center truncate max-w-full">
+                      <span className="text-[11px] font-semibold text-center truncate max-w-full text-foreground/80 group-hover:text-foreground">
                         {tech.name}
                       </span>
                     </div>
@@ -214,13 +221,13 @@ export function SkillsSection() {
                 {skillGroups.map((group, index) => {
                   const Icon = group.icon;
                   return (
-                    <Card key={index} className="border-border/60 hover:border-primary/40 transition-colors">
-                      <CardContent className="p-6">
-                        <div className="flex items-center gap-3 mb-5">
-                          <div className={`p-2.5 rounded-lg bg-muted/60 ${group.color}`}>
+                    <Card key={index} className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all">
+                      <CardContent className="p-6 sm:p-7">
+                        <div className="flex items-center gap-3.5 mb-5">
+                          <div className={`p-2.5 rounded-xl bg-card border border-border/70 ${group.color} shadow-sm`}>
                             <Icon className="h-5 w-5" />
                           </div>
-                          <h3 className="text-lg font-bold">{group.category}</h3>
+                          <h3 className="text-lg font-bold tracking-tight">{group.category}</h3>
                         </div>
 
                         <div className="flex flex-wrap gap-2">
@@ -228,10 +235,10 @@ export function SkillsSection() {
                             <Badge
                               key={sIdx}
                               variant={skill.highlight ? "default" : "secondary"}
-                              className={`text-xs py-1.5 px-3 font-medium transition-colors ${
+                              className={`text-xs py-1.5 px-3 rounded-lg font-medium transition-all ${
                                 skill.highlight
-                                  ? "bg-primary/90 hover:bg-primary text-primary-foreground"
-                                  : "bg-muted hover:bg-muted/80 text-foreground"
+                                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:bg-primary/90"
+                                  : "bg-muted/70 hover:bg-muted text-foreground/90 border border-border/60"
                               }`}
                             >
                               {skill.name}

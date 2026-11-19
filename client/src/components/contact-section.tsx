@@ -81,126 +81,127 @@ export function ContactSection() {
 
 
   return (
-    <section id="contact" className="section-padding bg-muted/50">
+    <section id="contact" className="section-padding relative">
       <div className="container-custom">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            Get In Touch
-          </h2>
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="text-2xl font-bold mb-6">Let's Work Together</h3>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                I'm always interested in discussing new opportunities, interesting projects, and innovative solutions. Whether you have a question or just want to say hi, feel free to reach out — you'll receive a response within 12 hours. Let's create something amazing together!
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <Badge variant="outline" className="mb-3 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+              Get in Touch
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Let's Connect & Build Together
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-10 items-start">
+            <div className="glass-panel rounded-3xl p-7 sm:p-8 border border-border/70 card-hover-effect">
+              <h3 className="text-xl sm:text-2xl font-bold mb-4 tracking-tight">Open for Opportunities</h3>
+              <p className="text-muted-foreground mb-8 leading-relaxed text-sm sm:text-base">
+                I'm always interested in discussing new opportunities, innovative AI solutions, microservice architecture, and engineering leadership. Whether you have a specific project or want to explore collaboration, feel free to reach out!
               </p>
 
-              <div className="mb-8">
-                <img
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-                  alt="Collaborative workspace"
-                  className="rounded-lg w-full h-64 object-cover"
-                />
-              </div>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Mail className="h-5 w-5 text-primary" />
+              <div className="space-y-5">
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                    <Mail className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-medium text-white">Email</p>
-                    <a href="mailto:latifovtebriz@gmail.com?subject=Project%20Discussion&body=Hello%20Tabriz,%0D%0A%0D%0AI%20would%20like%20to%20discuss%20a%20potential%20project%20with%20you.%0D%0A%0D%0ABest%20regards," className="text-muted-foreground hover:text-primary transition-colors">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</p>
+                    <a href="mailto:latifovtebriz@gmail.com" className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block">
                       latifovtebriz@gmail.com
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Phone className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                    <Phone className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-medium text-white">Phone</p>
-                    <a href="tel:+994507895282" className="text-muted-foreground hover:text-primary transition-colors">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone</p>
+                    <a href="tel:+994507895282" className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block">
                       +994 50 789 52 82
                     </a>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Linkedin className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                    <Linkedin className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="font-medium text-white">LinkedIn</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">LinkedIn</p>
                     <a
                       href="https://www.linkedin.com/in/tabriz-latifov-544307260/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary transition-colors"
+                      className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block"
                       onClick={() => trackEvent('click', 'social_media', 'linkedin_contact')}
                     >
                       linkedin.com/in/tabriz-latifov
                     </a>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            <div className="p-8 rounded-lg border border-muted/20">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="glass-panel rounded-3xl p-7 sm:p-8 border border-border/70 card-hover-effect shadow-xl">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-white">Name</Label>
+                  <Label htmlFor="name" className="text-sm font-semibold text-foreground">Your Name</Label>
                   <Input
                     id="name"
                     name="name"
-                    placeholder="Your Name"
+                    placeholder="John Doe"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="bg-transparent border-muted/30 text-white placeholder:text-muted-foreground"
+                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white">Email</Label>
+                  <Label htmlFor="email" className="text-sm font-semibold text-foreground">Email Address</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="bg-transparent border-muted/30 text-white placeholder:text-muted-foreground"
+                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-white">Subject</Label>
+                  <Label htmlFor="subject" className="text-sm font-semibold text-foreground">Subject</Label>
                   <Input
                     id="subject"
                     name="subject"
-                    placeholder="Project Discussion"
+                    placeholder="Project Inquiry / Opportunity"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className="bg-transparent border-muted/30 text-white placeholder:text-muted-foreground"
+                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-white">Message</Label>
+                  <Label htmlFor="message" className="text-sm font-semibold text-foreground">Message</Label>
                   <Textarea
                     id="message"
                     name="message"
                     rows={4}
-                    placeholder="Tell me about your project..."
+                    placeholder="Share details about your project or inquiry..."
                     value={formData.message}
                     onChange={handleInputChange}
-                    className="bg-transparent border-muted/30 text-white placeholder:text-muted-foreground resize-none"
+                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all resize-none"
                     required
                   />
                 </div>
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white py-3" disabled={isSubmitting}>
+                <Button 
+                  type="submit" 
+                  className="w-full rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-200" 
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>

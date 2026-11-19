@@ -221,21 +221,24 @@ export function ExperienceSection() {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <section id="experience" className="section-padding bg-muted/30">
+    <section id="experience" className="section-padding relative">
       <div className="container-custom">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <Badge variant="outline" className="mb-2 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+                Career Trajectory
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 Work Experience
               </h2>
-              <p className="text-muted-foreground mt-2 text-sm md:text-base">
-                Engineering scalable backend systems, SRE infrastructure, and enterprise Generative AI integrations.
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-xl">
+                Designing scalable systems, distributed microservices, MLOps/SRE pipelines, and enterprise Generative AI integrations.
               </p>
             </div>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all self-start sm:self-auto"
             >
               {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               {isExpanded ? "Collapse" : "Expand"}
@@ -247,62 +250,68 @@ export function ExperienceSection() {
               {experiences.map((exp, index) => (
                 <Card
                   key={index}
-                  className={`relative transition-all hover:shadow-md ${
-                    exp.current ? "border-primary/50 shadow-sm" : "border-border/60"
+                  className={`glass-panel card-hover-effect rounded-2xl relative transition-all duration-300 ${
+                    exp.current ? "border-primary/60 shadow-lg shadow-primary/5 ring-1 ring-primary/20" : "border-border/70"
                   }`}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                  <CardContent className="p-6 sm:p-7">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4 gap-2">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center flex-wrap gap-2.5 mb-1.5">
                           <h3 className="text-xl font-bold text-foreground">
                             {exp.title}
                           </h3>
                           {exp.highlightAi && (
-                            <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/30">
+                            <Badge variant="outline" className="text-[11px] font-semibold bg-primary/10 text-primary border-primary/30 px-2.5 py-0.5 rounded-full">
                               AI Focus
                             </Badge>
                           )}
+                          {exp.current && (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Active
+                            </span>
+                          )}
                         </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-muted-foreground mb-3 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-muted-foreground text-sm">
                           <span className="font-semibold text-primary">{exp.company}</span>
-                          <span className="hidden sm:inline">•</span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3.5 w-3.5 inline" /> {exp.location}
+                          <span className="hidden sm:inline text-muted-foreground/40">•</span>
+                          <span className="flex items-center gap-1.5 text-xs sm:text-sm">
+                            <MapPin className="h-3.5 w-3.5 text-primary/70 shrink-0" /> {exp.location}
                           </span>
                         </div>
                       </div>
                       <Badge
                         variant={exp.current ? "default" : "outline"}
-                        className={`self-start mt-2 md:mt-0 ${
+                        className={`self-start text-xs px-3 py-1 rounded-lg ${
                           exp.current
-                            ? "bg-primary text-primary-foreground font-semibold"
-                            : "text-muted-foreground"
+                            ? "bg-primary text-primary-foreground font-semibold shadow-sm"
+                            : "text-muted-foreground border-border/80"
                         }`}
                       >
-                        <Calendar className="h-3 w-3 mr-1 inline" />
+                        <Calendar className="h-3.5 w-3.5 mr-1.5 inline" />
                         {exp.period}
                       </Badge>
                     </div>
 
                     {exp.highlights ? (
-                      <ul className="space-y-2 mb-4">
+                      <ul className="space-y-2.5 mb-5">
                         {exp.highlights.map((highlight, hIndex) => (
-                          <li key={hIndex} className="flex items-start gap-2.5 text-sm md:text-base text-muted-foreground leading-relaxed">
-                            <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                          <li key={hIndex} className="flex items-start gap-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2.5 ring-4 ring-primary/15" />
                             <span>{highlight}</span>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-muted-foreground mb-4 leading-relaxed text-sm md:text-base">
+                      <p className="text-muted-foreground mb-5 leading-relaxed text-sm sm:text-base">
                         {exp.description}
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-border/40">
                       {exp.technologies.map((tech) => (
-                        <Badge key={tech} variant="secondary" className="text-xs">
+                        <Badge key={tech} variant="secondary" className="text-xs font-medium px-2.5 py-1 rounded-md bg-muted/60 border border-border/50 hover:border-primary/40 transition-colors">
                           {tech}
                         </Badge>
                       ))}

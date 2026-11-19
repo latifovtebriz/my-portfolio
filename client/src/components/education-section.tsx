@@ -131,23 +131,30 @@ export function EducationSection() {
   };
 
   return (
-    <section id="education" className="section-padding bg-muted/20">
+    <section id="education" className="section-padding relative">
       <div className="container-custom">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            Education & Certifications
-          </h2>
+          <div className="text-center mb-14">
+            <Badge variant="outline" className="mb-3 text-primary border-primary/25 bg-primary/5 px-3.5 py-1 text-xs uppercase tracking-wider font-semibold">
+              Continuous Learning
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Education & Certifications
+            </h2>
+          </div>
 
           {/* Education Subsection */}
           <div className="mb-14">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <GraduationCap className="h-6 w-6 text-primary" />
-                <h3 className="text-2xl font-bold">Formal Education & Training</h3>
+                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Formal Education & Training</h3>
               </div>
               <button
                 onClick={() => setIsEducationExpanded(!isEducationExpanded)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all"
               >
                 {isEducationExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {isEducationExpanded ? "Collapse" : "Expand"}
@@ -157,16 +164,16 @@ export function EducationSection() {
             {isEducationExpanded && (
               <div className="grid md:grid-cols-2 gap-6">
                 {education.map((edu, index) => (
-                  <Card key={index} className="border-border/60 hover:border-primary/40 transition-colors">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-bold text-lg leading-tight">{edu.degree}</h4>
-                        <Badge variant="outline" className="text-xs">
+                  <Card key={index} className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all">
+                    <CardContent className="p-6 sm:p-7">
+                      <div className="flex items-start justify-between mb-2.5 gap-2">
+                        <h4 className="font-bold text-lg leading-tight tracking-tight">{edu.degree}</h4>
+                        <Badge variant="outline" className="text-xs px-2.5 py-0.5 rounded-full shrink-0 border-border/80">
                           {edu.period}
                         </Badge>
                       </div>
                       <p className="font-semibold text-primary mb-1 text-sm">{edu.institution}</p>
-                      <p className="text-xs text-muted-foreground mb-3">{edu.location}</p>
+                      <p className="text-xs text-muted-foreground mb-3.5 font-medium">{edu.location}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {edu.description}
                       </p>
@@ -181,12 +188,14 @@ export function EducationSection() {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <Award className="h-6 w-6 text-primary" />
-                <h3 className="text-2xl font-bold">Certificates & Published Work</h3>
+                <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                  <Award className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Certificates & Published Work</h3>
               </div>
               <button
                 onClick={() => setIsAchievementsExpanded(!isAchievementsExpanded)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground bg-card/60 border border-border/60 hover:border-primary/40 transition-all"
               >
                 {isAchievementsExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {isAchievementsExpanded ? "Collapse" : "Expand"}
@@ -198,22 +207,22 @@ export function EducationSection() {
                 {achievements.map((achievement, index) => (
                   <Card
                     key={index}
-                    className="relative group hover:shadow-lg transition-all border-border/60 hover:border-primary/40"
+                    className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all flex flex-col justify-between"
                   >
                     <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-3.5 gap-2">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-sm leading-tight mb-2 line-clamp-2">
+                          <h4 className="font-bold text-sm leading-tight mb-1.5 line-clamp-2 tracking-tight">
                             {achievement.title}
                           </h4>
-                          <p className="text-xs text-primary font-medium mb-2 truncate">
+                          <p className="text-xs text-primary font-medium mb-2.5 truncate">
                             {achievement.organization}
                           </p>
                           <div className="flex items-center gap-2 mb-3">
-                            <Badge variant="secondary" className="text-xs capitalize">
+                            <Badge variant="secondary" className="text-[11px] capitalize px-2 py-0.5 rounded-md bg-muted/70">
                               {achievement.type}
                             </Badge>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-[11px] px-2 py-0.5 rounded-md">
                               {achievement.year}
                             </Badge>
                           </div>
@@ -221,10 +230,10 @@ export function EducationSection() {
                         {achievement.downloadUrl && (
                           <button
                             onClick={() => handleDownload(achievement.downloadUrl!, achievement.title)}
-                            className="ml-2 p-2 rounded-lg bg-muted hover:bg-primary/20 hover:text-primary transition-colors flex-shrink-0"
+                            className="p-2.5 rounded-xl bg-card/80 border border-border/70 hover:border-primary/50 hover:bg-primary/10 hover:text-primary transition-all flex-shrink-0 shadow-sm"
                             title="Download Certificate / Paper"
                           >
-                            <Download className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                            <Download className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
                           </button>
                         )}
                       </div>
