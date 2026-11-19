@@ -55,7 +55,7 @@ export function HeroSection() {
           </div>
 
           <p className="text-lg mb-8 max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-            Software Engineer with <strong>4+ years of experience</strong> in C# and the .NET ecosystem, microservices architecture, and DevOps practices, plus <strong>2+ years of experience</strong> in Python development and AI/LLM engineering. Proven track record in designing scalable systems, building production-grade RAG pipelines, vector search, and managing cloud infrastructure.
+            Software Engineer with <strong>4+ years of experience</strong> in C# and the .NET ecosystem, microservices architecture, and DevOps practices, plus <strong>2+ years of experience</strong> in Python development and AI/LLM engineering. Proven track record in designing scalable systems, automating CI/CD pipelines, and managing cloud infrastructure. Growing expertise in AI-assisted engineering, including Generative AI/LLM integration, RAG, embeddings, and vector search for enterprise and domain-specific use cases.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

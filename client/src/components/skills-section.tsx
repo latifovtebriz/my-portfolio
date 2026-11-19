@@ -10,13 +10,16 @@ import {
   SiSharp, SiDotnet, SiPython, SiFastapi, SiFlask, SiPandas, SiNumpy,
   SiOpenai, SiAnthropic, SiDocker, SiKubernetes, SiTerraform, SiAnsible,
   SiPrometheus, SiGrafana, SiElasticsearch, SiLinux, SiPostgresql,
-  SiRedis, SiClickhouse, SiOracle, SiRabbitmq, SiApachekafka, SiGit, SiMlflow
+  SiRedis, SiClickhouse, SiOracle, SiRabbitmq, SiApachekafka, SiGit, SiMlflow,
+  SiLangchain, SiHuggingface
 } from "react-icons/si";
 
 // Featured Technologies visual bar
 const featuredTechs = [
   { name: "OpenAI", icon: SiOpenai, color: "text-emerald-500" },
   { name: "Claude", icon: SiAnthropic, color: "text-amber-600" },
+  { name: "LangChain", icon: SiLangchain, color: "text-emerald-400" },
+  { name: "Hugging Face", icon: SiHuggingface, color: "text-yellow-500" },
   { name: "Python", icon: SiPython, color: "text-yellow-500" },
   { name: "FastAPI", icon: SiFastapi, color: "text-teal-500" },
   { name: "C#", icon: SiSharp, color: "text-purple-600" },
@@ -45,53 +48,57 @@ interface SkillGroup {
 
 const skillGroups: SkillGroup[] = [
   {
-    category: "LLM & AI Engineering",
+    category: "Generative AI & LLM Engineering",
     icon: Brain,
     color: "text-purple-500",
     skills: [
-      { name: "Prompt Engineering", highlight: true },
+      { name: "Generative AI / LLM Integration", highlight: true },
       { name: "RAG (Retrieval-Augmented Generation)", highlight: true },
       { name: "Embeddings & Vector Search", highlight: true },
       { name: "Semantic Search", highlight: true },
+      { name: "Prompt Engineering", highlight: true },
       { name: "Tool-using LLM & Agent Workflows", highlight: true },
-      { name: "Model Selection", highlight: false },
+      { name: "AI-Assisted Engineering Practices", highlight: true },
+      { name: "Local/Self-hosted AI (Llama, Mistral, DeepSeek)", highlight: true },
+      { name: "Model Inference & Serving (vLLM, Ollama)", highlight: true },
+      { name: "Deterministic Guardrails & Safety", highlight: false },
       { name: "OCR & Document Data Extraction", highlight: false },
-      { name: "Self-hosting Open-Source Models (Llama, Mistral)", highlight: true },
     ],
   },
   {
-    category: "LLM Providers & Frameworks",
+    category: "LLM Frameworks, APIs & Ecosystem",
     icon: Bot,
     color: "text-emerald-500",
     skills: [
-      { name: "OpenAI (GPT-4, ChatGPT API)", highlight: true },
-      { name: "Anthropic Claude", highlight: true },
-      { name: "Llama (Meta)", highlight: true },
-      { name: "Mistral AI", highlight: true },
+      { name: "OpenAI API (GPT-4o, ChatGPT)", highlight: true },
+      { name: "Anthropic Claude API", highlight: true },
       { name: "LangChain", highlight: true },
       { name: "LlamaIndex", highlight: true },
+      { name: "Hugging Face Transformers", highlight: true },
+      { name: "Meta Llama & Mistral AI", highlight: false },
     ],
   },
   {
-    category: "Vector Databases",
+    category: "Vector Databases & Search",
     icon: Database,
     color: "text-amber-500",
     skills: [
       { name: "Pinecone", highlight: true },
       { name: "FAISS", highlight: true },
       { name: "Weaviate", highlight: true },
+      { name: "pgvector (PostgreSQL)", highlight: true },
     ],
   },
   {
-    category: "Evaluation & Experimentation",
+    category: "Evaluation, MLOps & Experimentation",
     icon: TestTube2,
     color: "text-pink-500",
     skills: [
-      { name: "LLM Output Evaluation (Accuracy, Relevance, Quality)", highlight: true },
-      { name: "Ragas", highlight: true },
-      { name: "MLflow", highlight: true },
+      { name: "LLM Output Evaluation (Accuracy, Relevance, Groundedness)", highlight: true },
+      { name: "Ragas Framework", highlight: true },
+      { name: "MLflow Tracking", highlight: true },
       { name: "A/B Testing of Prompts & Pipelines", highlight: true },
-      { name: "Model Configurations & Benchmarking", highlight: false },
+      { name: "Model Benchmarking & Token Optimization", highlight: false },
     ],
   },
   {

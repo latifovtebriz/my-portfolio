@@ -8,7 +8,8 @@ interface Experience {
   company: string;
   period: string;
   location: string;
-  description: string;
+  description?: string;
+  highlights?: string[];
   technologies: string[];
   current: boolean;
   highlightAi?: boolean;
@@ -20,8 +21,12 @@ const experiences: Experience[] = [
     company: "Ateshgah Insurance OJSC",
     period: "Dec 2025 – Present",
     location: "Baku, Azerbaijan (Hybrid)",
-    description:
-      "Engineer insurance and fintech solutions using C#/.NET Core, ASP.NET Web API, MS SQL Server, and microservices. Integrate Generative AI, LLMs, ChatGPT, and Claude into development, debugging, testing, and documentation workflows. Explore local/self-hosted AI models, RAG, embeddings, and vector search for enterprise and insurance use cases while applying AI-assisted engineering practices to boost development efficiency and maintain high code quality and security.",
+    highlights: [
+      "Engineer insurance and fintech solutions using C#/.NET Core, ASP.NET Web API, MS SQL Server, and microservices.",
+      "Integrate Generative AI, LLMs, ChatGPT, and Claude into development, debugging, testing, and documentation workflows.",
+      "Explore local/self-hosted AI models, RAG, embeddings, and vector search for enterprise and insurance use cases.",
+      "Apply AI-assisted engineering practices to improve development efficiency while maintaining code quality and security.",
+    ],
     technologies: [
       "C#",
       ".NET Core",
@@ -43,22 +48,30 @@ const experiences: Experience[] = [
     highlightAi: true,
   },
   {
-    title: "SRE & AI Engineer",
+    title: "AI & SRE Engineer",
     company: "Skolyn",
     period: "Oct 2025 – Present",
     location: "Remote (Contract)",
-    description:
-      "Develop and maintain deployment and infrastructure workflows for a medical enterprise ERP platform. Design CI/CD, containerization, deployment automation, monitoring, and logging workflows. Apply AI-assisted approaches to infrastructure troubleshooting, log analysis, and operational automation. Work extensively with Docker, Kubernetes, Linux, Azure DevOps, and cloud-native deployment practices.",
+    highlights: [
+      "Lead development, fine-tuning, and deployment of domain-specific LLM models and intelligent agentic workflows for a medical enterprise ERP platform.",
+      "Build and optimize high-throughput, low-latency LLM serving and inference pipelines using containerized deployments (Docker, Kubernetes, vLLM/Ollama).",
+      "Implement production-grade RAG pipelines, semantic vector search, and clinical knowledge retrieval over structured and unstructured medical ERP data.",
+      "Design and deploy autonomous AI agents for automated infrastructure troubleshooting, log analysis, anomaly detection, and operational automation.",
+      "Establish robust CI/CD, MLOps, containerization, and monitoring workflows using Docker, Kubernetes, Linux, Azure DevOps, Prometheus, and Grafana.",
+    ],
     technologies: [
-      "SRE Practices",
-      "AI-Assisted Troubleshooting",
-      "Log Analysis",
+      "Generative AI",
+      "LLM Development",
+      "AI Agents",
+      "RAG",
+      "Vector Search",
+      "vLLM / Ollama",
+      "MLOps / LLMOps",
       "Docker",
       "Kubernetes",
       "Linux OS",
       "Azure DevOps",
       "CI/CD Automation",
-      "Terraform",
       "Prometheus",
       "Grafana",
       "ELK Stack",
@@ -71,8 +84,12 @@ const experiences: Experience[] = [
     company: "Freelance",
     period: "May 2025 – Oct 2025",
     location: "United States (Remote)",
-    description:
-      "Developed software solutions focused on Generative AI, LLM integration, and data-oriented applications. Built Python-based data processing and automation workflows for AI-enabled applications. Explored RAG, embeddings, vector search, and AI-powered information retrieval for structured and unstructured data. Applied LLMs and AI-assisted development across coding, debugging, testing, and documentation.",
+    highlights: [
+      "Developed software solutions focused on Generative AI, LLM integration, and data-oriented applications.",
+      "Built Python-based data processing and automation workflows for AI-enabled applications.",
+      "Explored RAG, embeddings, vector search, and AI-powered information retrieval for structured and unstructured data.",
+      "Applied LLMs and AI-assisted development across coding, debugging, testing, documentation, and automation.",
+    ],
     technologies: [
       "Python",
       "Generative AI",
@@ -94,8 +111,12 @@ const experiences: Experience[] = [
     company: "DendClub",
     period: "Nov 2024 – May 2025",
     location: "Remote (Contract)",
-    description:
-      "Developed software solutions for medical processes and workflow automation. Explored LLM and Generative AI integration for information processing and clinical workflow automation. Applied AI-assisted development for implementation, debugging, testing, and documentation. Investigated RAG, semantic search, embeddings, and vector-based information retrieval for domain-specific medical data.",
+    highlights: [
+      "Developed software solutions for medical processes and workflow automation.",
+      "Explored LLM and Generative AI integration for information processing and workflow automation.",
+      "Applied AI-assisted development for implementation, debugging, testing, and documentation.",
+      "Investigated RAG, semantic search, embeddings, and vector-based information retrieval for domain-specific data.",
+    ],
     technologies: [
       "C#",
       ".NET Core",
@@ -117,8 +138,11 @@ const experiences: Experience[] = [
     company: "CodeWorld",
     period: "Apr 2025 – Mar 2026",
     location: "Baku, Azerbaijan (Contract)",
-    description:
-      "Teach C# programming, backend development, and software engineering principles. Introduce students to AI-assisted coding and LLM-based development workflows. Demonstrate LLM applications in code generation, debugging, refactoring, testing, and documentation.",
+    highlights: [
+      "Teach C# programming, backend development, and software engineering principles.",
+      "Introduce students to AI-assisted coding and LLM-based development workflows.",
+      "Demonstrate LLM applications in code generation, debugging, refactoring, testing, and documentation.",
+    ],
     technologies: [
       "C#",
       ".NET Core",
@@ -137,8 +161,10 @@ const experiences: Experience[] = [
     company: "Software Village",
     period: "Aug 2024 – Feb 2026",
     location: "Azerbaijan (Contract)",
-    description:
-      "Teach C# programming and software development. Provide practical guidance in backend development, programming fundamentals, debugging, and software engineering.",
+    highlights: [
+      "Teach C# programming and software development.",
+      "Provide practical guidance in backend development, programming fundamentals, debugging, and software engineering.",
+    ],
     technologies: [
       "C#",
       ".NET",
@@ -154,8 +180,10 @@ const experiences: Experience[] = [
     company: "Kronos (COP29)",
     period: "Oct 2024 – Nov 2024",
     location: "Baku, Azerbaijan (On-site)",
-    description:
-      "Provided critical on-site IT technical support services during COP29 Baku, Azerbaijan. Managed network infrastructure, hardware/software troubleshooting, and ensured high-availability operational support for conference systems.",
+    highlights: [
+      "Provided on-site IT technical support services during COP29 Baku, Azerbaijan.",
+      "Ensured high-availability operational support, hardware/software troubleshooting, and network reliability for global delegates.",
+    ],
     technologies: [
       "Network Administration",
       "TCP/IP",
@@ -170,8 +198,11 @@ const experiences: Experience[] = [
     company: "TIC",
     period: "May 2021 – Oct 2024",
     location: "United States (Remote)",
-    description:
-      "Developed full-stack web applications for US-based clients and software products. Worked on application development, debugging, integration, and software delivery within a remote international development environment.",
+    highlights: [
+      "Developed full-stack web applications for US-based clients and software products.",
+      "Worked on application development, debugging, integration, and software delivery.",
+      "Collaborated within a remote international development environment.",
+    ],
     technologies: [
       "C#",
       ".NET Core",
@@ -254,9 +285,20 @@ export function ExperienceSection() {
                       </Badge>
                     </div>
 
-                    <p className="text-muted-foreground mb-4 leading-relaxed text-sm md:text-base">
-                      {exp.description}
-                    </p>
+                    {exp.highlights ? (
+                      <ul className="space-y-2 mb-4">
+                        {exp.highlights.map((highlight, hIndex) => (
+                          <li key={hIndex} className="flex items-start gap-2.5 text-sm md:text-base text-muted-foreground leading-relaxed">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-2" />
+                            <span>{highlight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground mb-4 leading-relaxed text-sm md:text-base">
+                        {exp.description}
+                      </p>
+                    )}
 
                     <div className="flex flex-wrap gap-1.5">
                       {exp.technologies.map((tech) => (
