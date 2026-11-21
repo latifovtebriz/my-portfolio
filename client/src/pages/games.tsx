@@ -17,6 +17,7 @@ import CheckersGame from "../components/checkers-game";
 import TankGame from "../components/tank-game";
 import Game2048 from "../components/game-2048";
 import NonogramGame from "../components/nonogram-game";
+import BrickBreakerGame from "../components/brick-breaker-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -119,6 +120,13 @@ export default function Games() {
       description: "Logic puzzle: fill cells by numbers!",
       icon: "⬛",
       component: NonogramGame,
+    },
+    {
+      id: "brick-breaker",
+      title: "Neon Brick Breaker",
+      description: "Retro arcade DX-Ball / Arkanoid with multi-ball, laser blaster, explosive TNT, and audio synthesis!",
+      icon: "💥",
+      component: BrickBreakerGame,
     },
   ];
 
