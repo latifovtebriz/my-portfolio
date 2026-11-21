@@ -422,6 +422,15 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
     generatePuzzle(randomScene);
   }, [generatePuzzle]);
 
+  const openThemeModal = useCallback(() => {
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+    setShowPreview(false);
+    setShowThemeModal(true);
+  }, []);
+
   // Handle Custom Photo Upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -440,7 +449,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
           imageUrl: dataUrl
         };
         // Reset file input value so user can upload the same or another file again
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        e.target.value = "";
 
         setScenes(prev => [customScene, ...prev.filter(s => s.id !== customScene.id)]);
         scenesRef.current = [customScene, ...scenesRef.current.filter(s => s.id !== customScene.id)];
@@ -551,7 +560,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowThemeModal(true)}
+            onClick={openThemeModal}
             className="h-8 px-2.5 rounded-xl text-xs font-bold gap-1.5 border-border/70 max-w-[140px] sm:max-w-none truncate"
             title="Choose different original photo or upload your own"
           >
@@ -829,7 +838,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
       {/* Select Photo / Custom Upload Modal */}
       {showThemeModal && (
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-background/90 backdrop-blur-md z-[60] flex items-center justify-center p-4">
           <Card className="max-w-2xl w-full glass-panel border border-border/80 shadow-2xl rounded-3xl overflow-hidden">
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between">
@@ -842,11 +851,18 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                 </Button>
               </div>
 
-              {/* Upload Custom Photo Banner */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="p-4 rounded-2xl border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group"
+              {/* Upload Custom Photo Banner (Native Label for Instant 1-Click File Open) */}
+              <label
+                htmlFor="custom-puzzle-upload"
+                className="p-4 rounded-2xl border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group block"
               >
+                <input
+                  id="custom-puzzle-upload"
+                  type="file"
+                  onChange={handlePhotoUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload className="h-5 w-5" />
@@ -856,10 +872,10 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                     <span className="text-xs text-muted-foreground">Upload any picture from your device to create an instant custom puzzle</span>
                   </div>
                 </div>
-                <Button size="sm" variant="secondary" className="rounded-xl font-bold text-xs pointer-events-none">
+                <div className="px-3.5 py-1.5 rounded-xl font-bold text-xs bg-secondary text-secondary-foreground shadow-sm group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   Select File
-                </Button>
-              </div>
+                </div>
+              </label>
 
               {/* Curated Gallery Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[340px] overflow-y-auto pr-1">
@@ -951,7 +967,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setShowThemeModal(true)}
+                  onClick={openThemeModal}
                   className="rounded-2xl font-semibold gap-1.5"
                 >
                   <ImageIcon className="h-4 w-4" />
