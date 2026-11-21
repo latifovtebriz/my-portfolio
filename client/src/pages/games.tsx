@@ -18,6 +18,7 @@ import TankGame from "../components/tank-game";
 import Game2048 from "../components/game-2048";
 import NonogramGame from "../components/nonogram-game";
 import BrickBreakerGame from "../components/brick-breaker-game";
+import SpaceDefenderGame from "../components/space-defender-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -127,6 +128,13 @@ export default function Games() {
       description: "Retro arcade DX-Ball / Arkanoid with multi-ball, laser blaster, explosive TNT, and audio synthesis!",
       icon: "💥",
       component: BrickBreakerGame,
+    },
+    {
+      id: "space-defender",
+      title: "Space Defender",
+      description: "Arcade Galaga / Space Invaders with plasma starfighter, alien swarms, EMP shockwaves, and Titan Bosses!",
+      icon: "🚀",
+      component: SpaceDefenderGame,
     },
   ];
 
