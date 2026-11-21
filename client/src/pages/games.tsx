@@ -52,9 +52,9 @@ export default function Games() {
     },
     {
       id: "dino-game",
-      title: "Dino Run",
-      description: "Jump over obstacles in this endless runner game!",
-      icon: "🦕",
+      title: "Dino Runner Pro",
+      description: "Endless prehistoric sprint with double jumps, golden eggs, shield orbs, and skins!",
+      icon: "🦖",
       component: DinoGame,
     },
     {
