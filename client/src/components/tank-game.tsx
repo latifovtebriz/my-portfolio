@@ -1688,6 +1688,28 @@ export default function TankGame({ onBack }: TankGameProps) {
   // Keyboard Event Handlers
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept keystrokes if typing inside an input, textarea or editable field
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
+      if (e.code === 'Escape' && isPlaying && !isGameOver) {
+        e.preventDefault();
+        setIsPaused(prev => !prev);
+        return;
+      }
+
+      if (!isPlaying || isGameOver || isPaused) return;
+
       const code = e.code;
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD'].includes(code)) {
         e.preventDefault();
@@ -1703,11 +1725,21 @@ export default function TankGame({ onBack }: TankGameProps) {
       // Tactical Abilities: Q = Airstrike, E = Landmine
       if (code === 'KeyQ') triggerAirstrike();
       if (code === 'KeyE') placeLandmine();
-
-      if (code === 'Escape') setIsPaused(prev => !prev);
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
       keysPressed.current.delete(e.code);
     };
 

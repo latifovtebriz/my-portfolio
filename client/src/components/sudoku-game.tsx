@@ -178,6 +178,19 @@ export default function SudokuGame({ onBack }: SudokuGameProps) {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (
+            target && (
+                target.tagName === "INPUT" ||
+                target.tagName === "TEXTAREA" ||
+                target.tagName === "SELECT" ||
+                target.isContentEditable ||
+                target.closest("input, textarea, select, [contenteditable='true']")
+            )
+        ) {
+            return;
+        }
+
         if (!selectedCell) return;
 
         if (e.key >= '1' && e.key <= '9') {

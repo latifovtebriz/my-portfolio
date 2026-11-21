@@ -260,6 +260,21 @@ export default function DinoGame({ onBack }: DinoGameProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
+      if (!isPlayingRef.current || isGameOverRef.current) return;
+
       // Only prevent default for our game keys (removed PageUp/PageDown)
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
@@ -268,7 +283,7 @@ export default function DinoGame({ onBack }: DinoGameProps) {
       // Only Space and ArrowUp for jump (PageUp removed to prevent scrolling conflicts)
       if (e.code === 'Space' || e.code === 'ArrowUp') {
         // Direct jump without callback dependency
-        if (isPlayingRef.current && !isGameOverRef.current && !isDuckingRef.current) {
+        if (!isDuckingRef.current) {
           const groundY = GAME_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT;
           if (dinoYRef.current >= groundY - 5) {
             dinoVelocityRef.current = JUMP_FORCE;
@@ -278,7 +293,7 @@ export default function DinoGame({ onBack }: DinoGameProps) {
         }
       } else if (e.code === 'ArrowDown') {
         // Direct duck without callback dependency
-        if (isPlayingRef.current && !isGameOverRef.current && !e.repeat) {
+        if (!e.repeat) {
           isDuckingRef.current = true;
           setIsDucking(true);
         }
@@ -286,6 +301,19 @@ export default function DinoGame({ onBack }: DinoGameProps) {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
       if (e.code === 'ArrowDown') {
         e.preventDefault();
         isDuckingRef.current = false;

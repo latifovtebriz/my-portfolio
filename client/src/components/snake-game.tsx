@@ -404,6 +404,22 @@ export default function SnakeGame({ onBack }: SnakeGameProps) {
   // Keyboard Event Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept keystrokes if typing inside an input, textarea or editable field
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
+      if (!isPlaying || isGameOver) return;
+
       const code = e.code;
       if (["ArrowUp", "KeyW"].includes(code)) {
         e.preventDefault();
@@ -419,9 +435,7 @@ export default function SnakeGame({ onBack }: SnakeGameProps) {
         changeDirection("RIGHT");
       } else if (code === "Space" || code === "Escape") {
         e.preventDefault();
-        if (isPlaying && !isGameOver) {
-          setIsPaused(p => !p);
-        }
+        setIsPaused(p => !p);
       }
     };
 

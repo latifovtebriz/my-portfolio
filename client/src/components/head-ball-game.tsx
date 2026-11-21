@@ -1696,6 +1696,19 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     if (gameMode !== 'playing') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
       const code = e.code;
 
       // Player 1 controls
@@ -1735,6 +1748,19 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target && (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest("input, textarea, select, [contenteditable='true']")
+        )
+      ) {
+        return;
+      }
+
       const code = e.code;
 
       if (code === 'KeyA' || code === 'ArrowLeft') keysRef.current.p1.left = false;
