@@ -20,6 +20,7 @@ import NonogramGame from "../components/nonogram-game";
 import BrickBreakerGame from "../components/brick-breaker-game";
 import SpaceDefenderGame from "../components/space-defender-game";
 import StackTowerGame from "../components/stack-tower-game";
+import ConnectFourGame from "../components/connect-four-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -143,6 +144,13 @@ export default function Games() {
       description: "Isometric 3D block stacking with slicing physics, harmonic combo chords, and sky architecture!",
       icon: "🏗️",
       component: StackTowerGame,
+    },
+    {
+      id: "connect-four",
+      title: "Connect 4 Cyber",
+      description: "Tactical 4-in-a-row with Minimax AI, alpha-beta pruning, 2-player mode, and token bounce physics!",
+      icon: "🔴",
+      component: ConnectFourGame,
     },
   ];
 
