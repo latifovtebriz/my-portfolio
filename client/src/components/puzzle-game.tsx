@@ -259,7 +259,15 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
   const [scoreSubmitted, setScoreSubmitted] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentSceneRef = useRef<ScenePhoto>(CURATED_SCENES[0]);
+  const scenesRef = useRef<ScenePhoto[]>(CURATED_SCENES);
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    scenesRef.current = scenes;
+  }, [scenes]);
 
   useEffect(() => {
     sound.enabled = soundEnabled;
@@ -341,7 +349,13 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
   // Generate / Reset Puzzle with Target Scene
   const generatePuzzle = useCallback((targetScene?: ScenePhoto) => {
-    const scene = targetScene || scenes[Math.floor(Math.random() * scenes.length)];
+    if (countdownTimerRef.current) {
+      clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
+
+    const scene = targetScene || currentSceneRef.current;
+    currentSceneRef.current = scene;
     setCurrentScene(scene);
 
     setPlacedCount(0);
@@ -374,10 +388,13 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
     setPieces(newPieces);
 
     // Initial countdown
-    const timer = setInterval(() => {
+    countdownTimerRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
-          clearInterval(timer);
+          if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+          }
           setShowPreview(false);
           setIsGameStarted(true);
 
@@ -390,10 +407,19 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
         return prev - 1;
       });
     }, 1000);
-  }, [scenes]);
+  }, []);
 
   useEffect(() => {
-    generatePuzzle();
+    generatePuzzle(CURATED_SCENES[0]);
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current);
+    };
+  }, [generatePuzzle]);
+
+  const handleShuffle = useCallback(() => {
+    const pool = scenesRef.current.filter(s => s.id !== currentSceneRef.current.id);
+    const randomScene = pool[Math.floor(Math.random() * pool.length)] || scenesRef.current[0];
+    generatePuzzle(randomScene);
   }, [generatePuzzle]);
 
   // Handle Custom Photo Upload
@@ -410,10 +436,15 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
           name: file.name.replace(/\.[^/.]+$/, "").slice(0, 20) || "Custom Photo",
           category: "My Upload",
           tag: "📷 Custom Photo",
-          description: "Your own personalized uploaded jigsaw picture",
+          description: "Your personalized uploaded jigsaw picture",
           imageUrl: dataUrl
         };
-        setScenes(prev => [customScene, ...prev]);
+        // Reset file input value so user can upload the same or another file again
+        if (fileInputRef.current) fileInputRef.current.value = "";
+
+        setScenes(prev => [customScene, ...prev.filter(s => s.id !== customScene.id)]);
+        scenesRef.current = [customScene, ...scenesRef.current.filter(s => s.id !== customScene.id)];
+        currentSceneRef.current = customScene;
         generatePuzzle(customScene);
         setShowThemeModal(false);
       }
@@ -620,7 +651,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => generatePuzzle()}
+            onClick={handleShuffle}
             className="h-8 w-8 rounded-xl"
             title="Randomize new puzzle photo"
           >
@@ -1001,7 +1032,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
               {/* Navigation Options */}
               <div className="flex gap-2">
-                <Button onClick={() => generatePuzzle()} className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold text-xs h-10">
+                <Button onClick={handleShuffle} className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold text-xs h-10">
                   <RotateCcw className="h-4 w-4 mr-1.5" />
                   Next Photo
                 </Button>
