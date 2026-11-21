@@ -38,9 +38,9 @@ export default function Games() {
     },
     {
       id: "tetris-game",
-      title: "Tetris",
-      description: "Classic Tetris - arrange blocks and clear lines!",
-      icon: "🎮",
+      title: "Tetris Arena Pro",
+      description: "Modern cyber Tetris with ghost piece trajectory, hold slot, hard drops, and sound effects!",
+      icon: "🧱",
       component: TetrisGame,
     },
     {
