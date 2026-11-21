@@ -19,6 +19,7 @@ import Game2048 from "../components/game-2048";
 import NonogramGame from "../components/nonogram-game";
 import BrickBreakerGame from "../components/brick-breaker-game";
 import SpaceDefenderGame from "../components/space-defender-game";
+import StackTowerGame from "../components/stack-tower-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -135,6 +136,13 @@ export default function Games() {
       description: "Arcade Galaga / Space Invaders with plasma starfighter, alien swarms, EMP shockwaves, and Titan Bosses!",
       icon: "🚀",
       component: SpaceDefenderGame,
+    },
+    {
+      id: "stack-tower",
+      title: "Stack Tower Pro",
+      description: "Isometric 3D block stacking with slicing physics, harmonic combo chords, and sky architecture!",
+      icon: "🏗️",
+      component: StackTowerGame,
     },
   ];
 
