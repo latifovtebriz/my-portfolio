@@ -24,8 +24,8 @@ export default function Games() {
   const games = [
     {
       id: "memory-card",
-      title: "Memory Card Game",
-      description: "Flip cards and find matching pairs with technology icons",
+      title: "Memory Matrix Pro",
+      description: "3D card matching with difficulty tiers, multiple decks, streaks, and matrix scan peek!",
       icon: "🧠",
       component: MemoryCardGame,
     },
