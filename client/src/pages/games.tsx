@@ -25,6 +25,7 @@ import MinesweeperGame from "../components/minesweeper-game";
 import WordleGame from "../components/wordle-game";
 import PacmanGame from "../components/pacman-game";
 import BackgammonGame from "../components/backgammon-game";
+import Match3Game from "../components/match3-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -183,6 +184,13 @@ export default function Games() {
       description: "Grandmaster Tavla / Nərd with standard and long variants, smart AI, dice animations, and blot hitting!",
       icon: "🎲",
       component: BackgammonGame,
+    },
+    {
+      id: "match-3",
+      title: "Match-3 Pro",
+      description: "Swap & match shiny gems with cascades, striped lasers, bomb blasts, and rainbow gems!",
+      icon: "🍬",
+      component: Match3Game,
     },
   ];
 
