@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Github, Linkedin, Mail, Download } from "lucide-react";
 import { TypeAnimation } from "react-type-animation";
-import tabrizPhoto from "@/assets/profile-image.png";
+import tabrizPhoto from "@/assets/profile-photo.jpg";
 import { trackEvent } from "@/lib/analytics";
 
 export function HeroSection() {
@@ -23,21 +23,12 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 gradient-bg overflow-hidden">
+    <section className="relative pt-28 pb-20 md:pt-36 md:pb-28 gradient-bg overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-primary/15 blur-[120px] rounded-full pointer-events-none -z-10" />
 
       <div className="container-custom relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Status Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 mb-8 backdrop-blur-md shadow-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span>Available for Generative AI & Senior Software Roles</span>
-          </div>
-
           {/* Profile Photo */}
           <div className="mb-8">
             <div className="hero-profile relative mx-auto w-48 h-48 sm:w-56 sm:h-56 rounded-full shadow-2xl">

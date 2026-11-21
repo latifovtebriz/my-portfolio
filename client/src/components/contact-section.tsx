@@ -156,7 +156,7 @@ export function ContactSection() {
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
+                    className="rounded-xl bg-slate-900/90 border border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/25 text-white placeholder:text-slate-400 transition-all py-5 [color-scheme:dark]"
                     required
                   />
                 </div>
@@ -169,7 +169,7 @@ export function ContactSection() {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
+                    className="rounded-xl bg-slate-900/90 border border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/25 text-white placeholder:text-slate-400 transition-all py-5 [color-scheme:dark]"
                     required
                   />
                 </div>
@@ -181,7 +181,7 @@ export function ContactSection() {
                     placeholder="Project Inquiry / Opportunity"
                     value={formData.subject}
                     onChange={handleInputChange}
-                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all py-5"
+                    className="rounded-xl bg-slate-900/90 border border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/25 text-white placeholder:text-slate-400 transition-all py-5 [color-scheme:dark]"
                     required
                   />
                 </div>
@@ -194,7 +194,7 @@ export function ContactSection() {
                     placeholder="Share details about your project or inquiry..."
                     value={formData.message}
                     onChange={handleInputChange}
-                    className="rounded-xl bg-card/60 border border-border/70 focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/60 transition-all resize-none"
+                    className="rounded-xl bg-slate-900/90 border border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary/25 text-white placeholder:text-slate-400 transition-all resize-none [color-scheme:dark]"
                     required
                   />
                 </div>
