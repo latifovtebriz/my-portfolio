@@ -27,6 +27,7 @@ import PacmanGame from "../components/pacman-game";
 import BackgammonGame from "../components/backgammon-game";
 import Match3Game from "../components/match3-game";
 import FruitNinjaGame from "../components/fruit-ninja-game";
+import BattleshipGame from "../components/battleship-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -199,6 +200,13 @@ export default function Games() {
       description: "Slice flying juicy fruits with glowing blade swipes, avoid bombs, and trigger freeze & frenzy storms!",
       icon: "🍉",
       component: FruitNinjaGame,
+    },
+    {
+      id: "battleship",
+      title: "Battleship Cyber",
+      description: "Naval warfare on 10x10 grids with probability heatmap AI, salvo mode, sonar recon, and hull explosions!",
+      icon: "🚢",
+      component: BattleshipGame,
     },
   ];
 
