@@ -26,6 +26,7 @@ import WordleGame from "../components/wordle-game";
 import PacmanGame from "../components/pacman-game";
 import BackgammonGame from "../components/backgammon-game";
 import Match3Game from "../components/match3-game";
+import FruitNinjaGame from "../components/fruit-ninja-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -191,6 +192,13 @@ export default function Games() {
       description: "Swap & match shiny gems with cascades, striped lasers, bomb blasts, and rainbow gems!",
       icon: "🍬",
       component: Match3Game,
+    },
+    {
+      id: "fruit-ninja",
+      title: "Fruit Ninja Pro",
+      description: "Slice flying juicy fruits with glowing blade swipes, avoid bombs, and trigger freeze & frenzy storms!",
+      icon: "🍉",
+      component: FruitNinjaGame,
     },
   ];
 
