@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 100%);
+  --background: hsl(210, 20%, 98%);
   --foreground: hsl(222.2, 84%, 4.9%);
-  --muted: hsl(210, 40%, 96.1%);
-  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --muted: hsl(210, 28%, 95%);
+  --muted-foreground: hsl(215.4, 18%, 44%);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: hsl(222.2, 84%, 4.9%);
   --card: hsl(0, 0%, 100%);
   --card-foreground: hsl(222.2, 84%, 4.9%);
-  --border: hsl(214.3, 31.8%, 91.4%);
-  --input: hsl(214.3, 31.8%, 91.4%);
+  --border: hsl(214.3, 31.8%, 90%);
+  --input: hsl(214.3, 31.8%, 90%);
   --primary: hsl(221.2, 83.2%, 53.3%);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(210, 40%, 96.1%);
+  --secondary: hsl(210, 30%, 95%);
   --secondary-foreground: hsl(222.2, 84%, 4.9%);
   --accent: hsl(160, 84%, 39%);
   --accent-foreground: hsl(210, 40%, 98%);
@@ -77,13 +77,27 @@
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, #818cf8 50%, #34d399 100%);
+    background: linear-gradient(135deg, #1d4ed8 0%, #6366f1 50%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .text-gradient-ai {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #059669 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .text-gradient {
+    background: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .text-gradient-ai {
     background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -91,10 +105,11 @@
   }
 
   .glass-panel {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 6px 18px -4px rgba(15, 23, 42, 0.04);
   }
 
   .dark .glass-panel {
@@ -102,6 +117,7 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
   }
 
   .card-hover-effect {
@@ -110,7 +126,11 @@
 
   .card-hover-effect:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px hsl(var(--primary) / 0.3);
+    box-shadow: 0 16px 30px -8px rgba(15, 23, 42, 0.08), 0 0 0 1px hsl(var(--primary) / 0.25);
+  }
+
+  .dark .card-hover-effect:hover {
+    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px hsl(var(--primary) / 0.35);
   }
 
   .hero-profile {
