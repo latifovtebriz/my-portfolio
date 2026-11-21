@@ -12,12 +12,12 @@ import {
 import { 
   RotateCcw, Trophy, Shuffle, Check, X, Clock, User, List,
   Volume2, VolumeX, Eye, EyeOff, Gamepad2, CheckCircle2, 
-  Sparkles, Award, Star, Flame, MousePointer
+  Sparkles, Award, Star, Upload, Image as ImageIcon, MousePointer
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // ============================================================================
-// AUDIO SYNTHESIZER (Pure Web Audio API - Zero External Asset Dependencies)
+// AUDIO SYNTHESIZER (Pure Web Audio API - Zero External Dependencies)
 // ============================================================================
 
 class SoundEngine {
@@ -43,8 +43,8 @@ class SoundEngine {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(420, now);
-      osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(820, now + 0.08);
       gain.gain.setValueAtTime(0.2, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
       osc.connect(gain);
@@ -60,19 +60,18 @@ class SoundEngine {
       this.initCtx();
       if (!this.ctx) return;
       const now = this.ctx.currentTime;
-      // Dual harmonic snap chime
-      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
         if (!this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = "triangle";
-        osc.frequency.setValueAtTime(freq, now + idx * 0.03);
-        gain.gain.setValueAtTime(0.22, now + idx * 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.03 + 0.22);
+        osc.frequency.setValueAtTime(freq, now + idx * 0.035);
+        gain.gain.setValueAtTime(0.2, now + idx * 0.035);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.035 + 0.22);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
-        osc.start(now + idx * 0.03);
-        osc.stop(now + idx * 0.03 + 0.22);
+        osc.start(now + idx * 0.035);
+        osc.stop(now + idx * 0.035 + 0.22);
       });
     } catch {}
   }
@@ -88,7 +87,7 @@ class SoundEngine {
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(160, now);
       osc.frequency.exponentialRampToValueAtTime(75, now + 0.2);
-      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.setValueAtTime(0.25, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
@@ -151,8 +150,6 @@ interface PuzzlePiece {
   id: number;
   row: number;
   col: number;
-  correctX: number;
-  correctY: number;
   isPlaced: boolean;
 }
 
@@ -160,204 +157,89 @@ interface PuzzleGameProps {
   onBack: () => void;
 }
 
-interface SvgElement {
-  type: string;
-  props: Record<string, any>;
-}
-
-interface SceneData {
+interface ScenePhoto {
   id: string;
   name: string;
   category: string;
-  difficulty: string;
   description: string;
-  generateScene: (width: number, height: number) => SvgElement[];
+  imageUrl: string;
+  tag: string;
 }
 
 const ROWS = 5;
 const COLS = 4;
 const TOTAL_PIECES = ROWS * COLS; // 20
-const PIECE_SIZE = 64;
-const SCENE_WIDTH = COLS * PIECE_SIZE;  // 256
-const SCENE_HEIGHT = ROWS * PIECE_SIZE; // 320
+const PIECE_WIDTH = 70;
+const PIECE_HEIGHT = 70;
+const BOARD_WIDTH = COLS * PIECE_WIDTH;   // 280px
+const BOARD_HEIGHT = ROWS * PIECE_HEIGHT; // 350px
 
-// ============================================================================
-// ARTISTIC SCENE GENERATORS (6 Rich Themes)
-// ============================================================================
-
-const PUZZLE_SCENES: SceneData[] = [
+// High-resolution original photography & art collection
+const CURATED_SCENES: ScenePhoto[] = [
   {
-    id: "forest",
-    name: "Emerald Forest",
-    category: "Nature",
-    difficulty: "Balanced",
-    description: "Sunlit trail through a lush pine forest with wild mushrooms and flora",
-    generateScene: (w, h) => [
-      // Sky
-      { type: 'rect', props: { x: 0, y: 0, width: w, height: h * 0.38, fill: '#7dd3fc' } },
-      // Sun
-      { type: 'circle', props: { cx: w * 0.82, cy: h * 0.14, r: 28, fill: '#fde047', opacity: 0.95 } },
-      // Rolling distant hills
-      { type: 'path', props: { d: `M 0 ${h * 0.36} Q ${w * 0.35} ${h * 0.22} ${w * 0.7} ${h * 0.34} Q ${w * 0.88} ${h * 0.38} ${w} ${h * 0.28} L ${w} ${h * 0.42} L 0 ${h * 0.42} Z`, fill: '#86efac' } },
-      // Meadow Ground
-      { type: 'rect', props: { x: 0, y: h * 0.38, width: w, height: h * 0.62, fill: '#15803d' } },
-      // Trees
-      ...[0.12, 0.3, 0.5, 0.72, 0.9].map((xP, i) => {
-        const sc = 0.85 + (i % 3) * 0.15;
-        const trY = h * 0.42 + (i % 2) * 28;
-        return [
-          { type: 'rect', props: { x: w * xP - 4 * sc, y: trY, width: 8 * sc, height: 35 * sc, fill: '#78350f' } },
-          { type: 'circle', props: { cx: w * xP, cy: trY - 18 * sc, r: 24 * sc, fill: i % 2 === 0 ? '#166534' : '#14532d' } },
-          { type: 'circle', props: { cx: w * xP - 8 * sc, cy: trY - 14 * sc, r: 16 * sc, fill: '#15803d' } },
-          { type: 'circle', props: { cx: w * xP + 8 * sc, cy: trY - 14 * sc, r: 16 * sc, fill: '#22c55e' } },
-        ];
-      }).flat(),
-      // Winding golden path
-      { type: 'path', props: { d: `M ${w * 0.2} ${h} Q ${w * 0.45} ${h * 0.75} ${w * 0.5} ${h * 0.58} Q ${w * 0.55} ${h * 0.48} ${w * 0.62} ${h * 0.42} L ${w * 0.68} ${h * 0.42} Q ${w * 0.6} ${h * 0.6} ${w * 0.4} ${h} Z`, fill: '#fde68a' } }
-    ]
+    id: "yosemite",
+    name: "Yosemite Alpine Lake",
+    category: "Wilderness",
+    tag: "🏔️ Nature",
+    description: "Turquoise alpine lake reflection framed by majestic granite peaks",
+    imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&h=750&q=85"
   },
   {
-    id: "sunset-city",
-    name: "Cyber Sunset",
-    category: "Architecture",
-    difficulty: "Advanced",
-    description: "Vibrant metropolis with glowing towers and neon horizon gradient",
-    generateScene: (w, h) => [
-      // Evening Sky Gradients
-      { type: 'rect', props: { x: 0, y: 0, width: w, height: h * 0.3, fill: '#312e81' } },
-      { type: 'rect', props: { x: 0, y: h * 0.3, width: w, height: h * 0.25, fill: '#e11d48' } },
-      { type: 'rect', props: { x: 0, y: h * 0.55, width: w, height: h * 0.45, fill: '#fb923c' } },
-      // Giant synthwave sun
-      { type: 'circle', props: { cx: w * 0.5, cy: h * 0.48, r: 48, fill: '#fde047', opacity: 0.95 } },
-      // Skyscraper Silhouettes
-      ...Array.from({ length: 9 }).map((_, i) => {
-        const bW = w / 8;
-        const bH = 50 + ((i * 37) % 110);
-        const bX = i * (bW - 2);
-        const bY = h - bH;
-        return [
-          { type: 'rect', props: { x: bX, y: bY, width: bW + 2, height: bH, fill: '#0f172a' } },
-          // Lit Windows
-          ...Array.from({ length: 5 }).map((__, j) => ({
-            type: 'rect',
-            props: { x: bX + 4 + (j % 2) * 10, y: bY + 10 + j * 16, width: 6, height: 8, fill: j % 2 === 0 ? '#38bdf8' : '#f43f5e', opacity: 0.85 }
-          }))
-        ];
-      }).flat()
-    ]
+    id: "tokyo-cyberpunk",
+    name: "Neo Tokyo Cyberpunk",
+    category: "Metropolis",
+    tag: "🌆 Cyberpunk",
+    description: "Vibrant neon-lit skyscrapers reflecting on glistening evening streets",
+    imageUrl: "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=600&h=750&q=85"
   },
   {
-    id: "space-voyager",
-    name: "Galactic Odyssey",
-    category: "Sci-Fi",
-    difficulty: "Challenging",
-    description: "Cosmic starship navigating orbital asteroid rings and nebulas",
-    generateScene: (w, h) => [
-      // Deep Space Void
-      { type: 'rect', props: { x: 0, y: 0, width: w, height: h, fill: '#030712' } },
-      // Nebula Swirls
-      { type: 'circle', props: { cx: w * 0.25, cy: h * 0.3, r: 80, fill: '#7c3aed', opacity: 0.25 } },
-      { type: 'circle', props: { cx: w * 0.75, cy: h * 0.7, r: 90, fill: '#ec4899', opacity: 0.2 } },
-      // Twinkling Stars
-      ...Array.from({ length: 35 }).map((_, i) => ({
-        type: 'circle',
-        props: {
-          cx: (i * 47) % w,
-          cy: (i * 83) % h,
-          r: (i % 3) === 0 ? 2.5 : 1.2,
-          fill: i % 4 === 0 ? '#67e8f9' : '#f8fafc',
-          opacity: 0.85
-        }
-      })),
-      // Ringed Gas Giant Planet
-      { type: 'circle', props: { cx: w * 0.8, cy: h * 0.22, r: 36, fill: '#f97316' } },
-      { type: 'ellipse', props: { cx: w * 0.8, cy: h * 0.22, rx: 65, ry: 10, fill: 'none', stroke: '#fed7aa', strokeWidth: 3, transform: `rotate(-22 ${w * 0.8} ${h * 0.22})` } },
-      // Retro Rocket Ship
-      { type: 'path', props: { d: `M ${w * 0.32} ${h * 0.65} L ${w * 0.32 + 24} ${h * 0.65} L ${w * 0.32 + 12} ${h * 0.65 - 45} Z`, fill: '#f8fafc' } },
-      { type: 'path', props: { d: `M ${w * 0.32} ${h * 0.65} L ${w * 0.32 - 8} ${h * 0.65 + 14} L ${w * 0.32 + 12} ${h * 0.65} Z`, fill: '#ef4444' } },
-      { type: 'path', props: { d: `M ${w * 0.32 + 24} ${h * 0.65} L ${w * 0.32 + 32} ${h * 0.65 + 14} L ${w * 0.32 + 12} ${h * 0.65} Z`, fill: '#ef4444' } },
-      { type: 'circle', props: { cx: w * 0.32 + 12, cy: h * 0.65 - 22, r: 6, fill: '#38bdf8' } },
-      // Thruster Flame
-      { type: 'path', props: { d: `M ${w * 0.32 + 6} ${h * 0.65} L ${w * 0.32 + 18} ${h * 0.65} L ${w * 0.32 + 12} ${h * 0.65 + 24} Z`, fill: '#f59e0b' } }
-    ]
+    id: "deep-space",
+    name: "Cosmic Nebula & Earth",
+    category: "Astronomy",
+    tag: "🌌 Deep Space",
+    description: "Orbital perspective of planet Earth surrounded by stellar constellations",
+    imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&h=750&q=85"
   },
   {
-    id: "coral-reef",
-    name: "Ocean Depths",
-    category: "Aquatic",
-    difficulty: "Serene",
-    description: "Tropical underwater sanctuary filled with playful clownfish and corals",
-    generateScene: (w, h) => [
-      // Deep Water Gradient
-      { type: 'rect', props: { x: 0, y: 0, width: w, height: h * 0.85, fill: '#0284c7' } },
-      { type: 'rect', props: { x: 0, y: h * 0.85, width: w, height: h * 0.15, fill: '#f59e0b' } },
-      // Coral formations
-      ...Array.from({ length: 7 }).map((_, i) => ({
-        type: 'path',
-        props: {
-          d: `M ${i * 42} ${h} Q ${i * 42 - 12} ${h * 0.72} ${i * 42} ${h * 0.58} Q ${i * 42 + 12} ${h * 0.44} ${i * 42} ${h * 0.35}`,
-          fill: 'none',
-          stroke: i % 2 === 0 ? '#10b981' : '#059669',
-          strokeWidth: 7,
-          strokeLinecap: 'round'
-        }
-      })),
-      // Bubble streams
-      ...Array.from({ length: 18 }).map((_, i) => ({
-        type: 'circle',
-        props: { cx: (i * 31) % w, cy: (i * 59) % (h * 0.8), r: 2 + (i % 4), fill: '#ffffff', opacity: 0.35 }
-      })),
-      // Vibrant Fish Trio
-      ...['#ef4444', '#facc15', '#a855f7'].map((col, idx) => {
-        const fx = w * 0.25 + idx * 70;
-        const fy = h * 0.28 + idx * 55;
-        return [
-          { type: 'ellipse', props: { cx: fx, cy: fy, rx: 24, ry: 14, fill: col } },
-          { type: 'path', props: { d: `M ${fx - 18} ${fy} L ${fx - 34} ${fy - 12} L ${fx - 34} ${fy + 12} Z`, fill: col } },
-          { type: 'circle', props: { cx: fx + 12, cy: fy - 4, r: 3, fill: '#ffffff' } },
-          { type: 'circle', props: { cx: fx + 13, cy: fy - 4, r: 1.5, fill: '#000000' } }
-        ];
-      }).flat()
-    ]
+    id: "maldives-beach",
+    name: "Tropical Coral Lagoon",
+    category: "Paradise",
+    tag: "🏝️ Ocean",
+    description: "Pristine white sand beach meeting crystal turquoise coral waters",
+    imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&h=750&q=85"
   },
   {
-    id: "desert-oasis",
-    name: "Golden Mirage",
-    category: "Adventure",
-    difficulty: "Pleasant",
-    description: "Ancient desert dunes with palm oasis and majestic twin pyramids",
-    generateScene: (w, h) => [
-      // Warm Twilight Sky
-      { type: 'rect', props: { x: 0, y: 0, width: w, height: h * 0.5, fill: '#fdba74' } },
-      // Crescent Moon
-      { type: 'circle', props: { cx: w * 0.2, cy: h * 0.16, r: 24, fill: '#fef08a' } },
-      { type: 'circle', props: { cx: w * 0.23, cy: h * 0.15, r: 20, fill: '#fdba74' } },
-      // Great Pyramids
-      { type: 'path', props: { d: `M ${w * 0.3} ${h * 0.5} L ${w * 0.5} ${h * 0.25} L ${w * 0.7} ${h * 0.5} Z`, fill: '#d97706' } },
-      { type: 'path', props: { d: `M ${w * 0.5} ${h * 0.25} L ${w * 0.7} ${h * 0.5} L ${w * 0.6} ${h * 0.5} Z`, fill: '#b45309' } },
-      // Rolling Dunes
-      { type: 'path', props: { d: `M 0 ${h * 0.5} Q ${w * 0.35} ${h * 0.42} ${w * 0.7} ${h * 0.54} Q ${w * 0.88} ${h * 0.58} ${w} ${h * 0.48} L ${w} ${h} L 0 ${h} Z`, fill: '#f59e0b' } },
-      { type: 'path', props: { d: `M 0 ${h * 0.7} Q ${w * 0.4} ${h * 0.62} ${w * 0.75} ${h * 0.76} L ${w} ${h} L 0 ${h} Z`, fill: '#d97706' } },
-      // Palm Trees
-      { type: 'rect', props: { x: w * 0.8 - 3, y: h * 0.65, width: 6, height: 45, fill: '#78350f' } },
-      { type: 'circle', props: { cx: w * 0.8, cy: h * 0.63, r: 18, fill: '#15803d' } }
-    ]
+    id: "bengal-tiger",
+    name: "Majestic Golden Tiger",
+    category: "Wildlife",
+    tag: "🐅 Wild Life",
+    description: "Intense and regal Bengal tiger portrait in lush jungle foliage",
+    imageUrl: "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&h=750&q=85"
+  },
+  {
+    id: "santorini-castle",
+    name: "Mediterranean Castle",
+    category: "Heritage",
+    tag: "🏛️ Architecture",
+    description: "Historic whitewashed coastal terrace overlooking the deep blue sea",
+    imageUrl: "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&h=750&q=85"
   }
 ];
 
 // ============================================================================
-// MAIN PUZZLE COMPONENT
+// MAIN COMPONENT
 // ============================================================================
 
 export default function PuzzleGame({ onBack }: PuzzleGameProps) {
-  const [currentScene, setCurrentScene] = useState<SceneData>(PUZZLE_SCENES[0]);
+  const [scenes, setScenes] = useState<ScenePhoto[]>(CURATED_SCENES);
+  const [currentScene, setCurrentScene] = useState<ScenePhoto>(CURATED_SCENES[0]);
   const [pieces, setPieces] = useState<PuzzlePiece[]>([]);
   const [hand, setHand] = useState<number[]>([]);
   const [selectedPieceId, setSelectedPieceId] = useState<number | null>(null);
   const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
   const [draggedPieceId, setDraggedPieceId] = useState<number | null>(null);
 
-  // Gameplay state
+  // Gameplay State
   const [score, setScore] = useState<number>(0);
   const [placedCount, setPlacedCount] = useState<number>(0);
   const [moves, setMoves] = useState<number>(0);
@@ -366,15 +248,17 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
   const [showPreview, setShowPreview] = useState<boolean>(true);
   const [countdown, setCountdown] = useState<number>(4);
   const [showGhostHint, setShowGhostHint] = useState<boolean>(false);
+  const [showThemeModal, setShowThemeModal] = useState<boolean>(false);
   const [errorSlot, setErrorSlot] = useState<number | null>(null);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
 
-  // Match Timer & Score Records
+  // Timer & High Score
   const [gameTime, setGameTime] = useState<number>(0);
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
   const [playerName, setPlayerName] = useState<string>("");
   const [scoreSubmitted, setScoreSubmitted] = useState<boolean>(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -438,7 +322,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
     }
   });
 
-  // Game countdown and timer
+  // Game timer
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isGameStarted && !isCompleted && !showPreview) {
@@ -455,9 +339,9 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Generate / Reset Puzzle
-  const generatePuzzle = useCallback((targetScene?: SceneData) => {
-    const scene = targetScene || PUZZLE_SCENES[Math.floor(Math.random() * PUZZLE_SCENES.length)];
+  // Generate / Reset Puzzle with Target Scene
+  const generatePuzzle = useCallback((targetScene?: ScenePhoto) => {
+    const scene = targetScene || scenes[Math.floor(Math.random() * scenes.length)];
     setCurrentScene(scene);
 
     setPlacedCount(0);
@@ -482,8 +366,6 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
           id,
           row: r,
           col: c,
-          correctX: c * PIECE_SIZE,
-          correctY: r * PIECE_SIZE,
           isPlaced: false,
         });
       }
@@ -491,7 +373,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
     setPieces(newPieces);
 
-    // Initial countdown before play begins
+    // Initial countdown
     const timer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
@@ -508,22 +390,46 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
         return prev - 1;
       });
     }, 1000);
-  }, []);
+  }, [scenes]);
 
   useEffect(() => {
     generatePuzzle();
   }, [generatePuzzle]);
 
-  // Handle Piece Placement (Unified logic for Drag-and-Drop and Click-to-Place)
+  // Handle Custom Photo Upload
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      if (dataUrl) {
+        const customScene: ScenePhoto = {
+          id: `custom-${Date.now()}`,
+          name: file.name.replace(/\.[^/.]+$/, "").slice(0, 20) || "Custom Photo",
+          category: "My Upload",
+          tag: "📷 Custom Photo",
+          description: "Your own personalized uploaded jigsaw picture",
+          imageUrl: dataUrl
+        };
+        setScenes(prev => [customScene, ...prev]);
+        generatePuzzle(customScene);
+        setShowThemeModal(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Unified Piece Placement Logic (Supports both Drag-and-Drop and Click-to-Place)
   const placePieceAtSlot = (pieceId: number, slotIndex: number) => {
     setErrorSlot(null);
     setMoves(m => m + 1);
 
-    // Check if slot is already occupied
     if (pieces[slotIndex]?.isPlaced) return;
 
     if (pieceId === slotIndex) {
-      // ✅ SUCCESSFUL SNAP!
+      // ✅ SUCCESS!
       sound.playSnap();
       setPieces(prev => prev.map(p => p.id === slotIndex ? { ...p, isPlaced: true } : p));
       setScore(s => s + 15);
@@ -537,7 +443,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
         return next;
       });
 
-      // Update player's hand: Remove placed piece & replenish from unplaced pool
+      // Update Hand: remove placed piece and draw next from unplaced pool
       setHand(prevHand => {
         const nextHand = prevHand.filter(id => id !== pieceId);
         const currentPlacedIds = pieces.filter(p => p.isPlaced).map(p => p.id);
@@ -566,24 +472,17 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
     }
   };
 
-  // Click-to-select hand piece
   const handlePieceClick = (id: number) => {
     sound.playPick();
-    if (selectedPieceId === id) {
-      setSelectedPieceId(null);
-    } else {
-      setSelectedPieceId(id);
-    }
+    setSelectedPieceId(prev => (prev === id ? null : id));
     setErrorSlot(null);
   };
 
-  // Click-to-place on grid slot
   const handleSlotClick = (slotIndex: number) => {
     if (selectedPieceId === null) return;
     placePieceAtSlot(selectedPieceId, slotIndex);
   };
 
-  // Calculate Stars Rating
   const calculateStars = () => {
     if (mistakes <= 1 && gameTime <= 60) return 3;
     if (mistakes <= 4 && gameTime <= 100) return 2;
@@ -591,10 +490,18 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
   };
 
   const starsEarned = calculateStars();
-  const sceneElements = currentScene.generateScene(SCENE_WIDTH, SCENE_HEIGHT);
 
   return (
     <div className="fixed inset-0 bg-background flex flex-col select-none overflow-hidden">
+      {/* Hidden File Input for Custom Photo Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handlePhotoUpload}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* Top TV Scoreboard Header */}
       <div className="flex flex-wrap items-center justify-between px-3 py-2 sm:px-6 sm:py-3 bg-card/85 backdrop-blur-md border-b border-border/80 shadow-sm shrink-0 z-20">
         <div className="flex items-center gap-2 sm:gap-3">
@@ -609,11 +516,17 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
             <span className="hidden sm:inline">My Games</span>
           </Button>
 
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-muted/60 border border-border/60">
-            <span className="text-xs font-bold text-foreground truncate max-w-[120px] sm:max-w-none">
-              {currentScene.name}
-            </span>
-          </div>
+          {/* Theme / Photo Selector Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowThemeModal(true)}
+            className="h-8 px-2.5 rounded-xl text-xs font-bold gap-1.5 border-border/70 max-w-[140px] sm:max-w-none truncate"
+            title="Choose different original photo or upload your own"
+          >
+            <ImageIcon className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate">{currentScene.name}</span>
+          </Button>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-muted/60 border border-border/60 font-mono text-xs">
             <Clock className="h-3 w-3 text-muted-foreground" />
@@ -646,7 +559,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
               setShowGhostHint(!showGhostHint);
             }}
             className="h-8 px-2.5 rounded-xl text-xs font-semibold gap-1.5"
-            title={showGhostHint ? "Hide visual guide" : "Show visual guide watermark"}
+            title={showGhostHint ? "Hide watermark guide" : "Show watermark guide"}
           >
             {showGhostHint ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             <span className="hidden sm:inline">{showGhostHint ? "Hide Hint" : "Hint"}</span>
@@ -663,7 +576,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
             {soundEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
           </Button>
 
-          {/* Results Dialog */}
+          {/* Records Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 px-2.5 rounded-xl text-xs font-semibold">
@@ -703,13 +616,13 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
             </DialogContent>
           </Dialog>
 
-          {/* Shuffle / Next Puzzle */}
+          {/* Next Random Photo */}
           <Button
             variant="outline"
             size="icon"
             onClick={() => generatePuzzle()}
             className="h-8 w-8 rounded-xl"
-            title="Randomize new puzzle scene"
+            title="Randomize new puzzle photo"
           >
             <Shuffle className="h-3.5 w-3.5" />
           </Button>
@@ -719,44 +632,42 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
       {/* Main Board Arena */}
       <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 overflow-hidden relative bg-slate-950">
         
-        {/* Interaction Guide Notice */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card/60 border border-border/50 text-[11px] font-semibold text-muted-foreground mb-3">
+        {/* Interaction Guide */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card/75 border border-border/50 text-[11px] font-semibold text-muted-foreground mb-3">
           <MousePointer className="h-3 w-3 text-primary animate-pulse" />
-          <span><b>Drag & Drop</b> pieces to slots, or <b>Click</b> a piece and click a slot to place!</span>
+          <span><b>Drag & Drop</b> photo pieces, or <b>Click</b> a piece and click a slot to place!</span>
         </div>
 
         {/* Puzzle Board Grid Container */}
         <div
           className="relative rounded-2xl p-2.5 bg-card/90 border-2 border-border/80 shadow-2xl backdrop-blur-md overflow-hidden select-none"
-          style={{ width: `${SCENE_WIDTH + 20}px`, height: `${SCENE_HEIGHT + 20}px` }}
+          style={{ width: `${BOARD_WIDTH + 20}px`, height: `${BOARD_HEIGHT + 20}px` }}
         >
-          {/* Subtle Ghost Watermark Hint (Optional Background Guide) */}
+          {/* Subtle Watermark Ghost Hint */}
           {showGhostHint && (
-            <div className="absolute inset-2.5 pointer-events-none opacity-20 rounded-xl overflow-hidden transition-opacity">
-              <svg width={SCENE_WIDTH} height={SCENE_HEIGHT} viewBox={`0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`}>
-                {sceneElements.map((el, i) => {
-                  const Comp = el.type as any;
-                  return <Comp key={i} {...el.props} />;
-                })}
-              </svg>
-            </div>
+            <div
+              className="absolute inset-2.5 pointer-events-none rounded-xl opacity-25 transition-opacity"
+              style={{
+                backgroundImage: `url(${currentScene.imageUrl})`,
+                backgroundSize: `${BOARD_WIDTH}px ${BOARD_HEIGHT}px`,
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
           )}
 
           {/* 4x5 Grid Slots */}
           <div
             className="grid grid-cols-4 gap-1 w-full h-full relative"
-            style={{ width: `${SCENE_WIDTH}px`, height: `${SCENE_HEIGHT}px` }}
+            style={{ width: `${BOARD_WIDTH}px`, height: `${BOARD_HEIGHT}px` }}
           >
             {pieces.map((piece, index) => {
               const row = Math.floor(piece.id / COLS);
               const col = piece.id % COLS;
-              const viewBoxX = col * PIECE_SIZE;
-              const viewBoxY = row * PIECE_SIZE;
 
               const isPlaced = piece.isPlaced;
               const isError = errorSlot === index;
               const isHovered = hoveredSlot === index;
-              const isSelectedTarget = selectedPieceId === index;
 
               return (
                 <div
@@ -783,26 +694,27 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                     }
                   }}
                   className={`
-                    relative rounded-xl overflow-hidden transition-all duration-200
-                    ${isPlaced ? 'border border-transparent shadow-sm' : 'border-2 border-dashed border-border/70 hover:border-primary/60 cursor-pointer'}
-                    ${isHovered && !isPlaced ? 'border-primary ring-2 ring-primary/40 bg-primary/10 scale-105 z-10' : ''}
-                    ${isError ? 'border-rose-500 bg-rose-500/20 ring-2 ring-rose-500 animate-bounce' : ''}
+                    relative rounded-lg overflow-hidden transition-all duration-200
+                    ${isPlaced ? 'shadow-sm border border-black/20' : 'border-2 border-dashed border-border/60 hover:border-primary/60 cursor-pointer bg-slate-900/60'}
+                    ${isHovered && !isPlaced ? 'border-primary ring-2 ring-primary/40 bg-primary/20 scale-105 z-10' : ''}
+                    ${isError ? 'border-rose-500 bg-rose-500/25 ring-2 ring-rose-500 animate-bounce' : ''}
                   `}
-                  style={{ width: `${PIECE_SIZE}px`, height: `${PIECE_SIZE}px` }}
+                  style={{ width: `${PIECE_WIDTH}px`, height: `${PIECE_HEIGHT}px` }}
                 >
                   {isPlaced ? (
-                    /* Placed Piece Content */
-                    <div className="w-full h-full overflow-hidden rounded-lg animate-in zoom-in-95 duration-200">
-                      <svg width={PIECE_SIZE} height={PIECE_SIZE} viewBox={`${viewBoxX} ${viewBoxY} ${PIECE_SIZE} ${PIECE_SIZE}`}>
-                        {sceneElements.map((el, i) => {
-                          const Comp = el.type as any;
-                          return <Comp key={i} {...el.props} />;
-                        })}
-                      </svg>
-                    </div>
+                    /* Seamless High-Definition Photo Slice */
+                    <div
+                      className="w-full h-full animate-in zoom-in-95 duration-200"
+                      style={{
+                        backgroundImage: `url(${currentScene.imageUrl})`,
+                        backgroundSize: `${BOARD_WIDTH}px ${BOARD_HEIGHT}px`,
+                        backgroundPosition: `-${col * PIECE_WIDTH}px -${row * PIECE_HEIGHT}px`,
+                        backgroundRepeat: 'no-repeat'
+                      }}
+                    />
                   ) : (
                     /* Empty Slot Guide */
-                    <div className="w-full h-full flex flex-col items-center justify-center text-[10px] text-muted-foreground/40 font-mono font-bold">
+                    <div className="w-full h-full flex flex-col items-center justify-center text-[10px] text-muted-foreground/35 font-mono font-bold">
                       {isError ? (
                         <X className="h-5 w-5 text-rose-500 animate-spin" />
                       ) : (
@@ -818,12 +730,12 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
       </div>
 
-      {/* Hand: Available Puzzle Pieces Tray (Bottom Dock) */}
-      <div className="h-[125px] shrink-0 bg-card/85 border-t border-border/80 flex flex-col items-center justify-center px-4 py-2 relative z-20">
+      {/* Hand: Available Photo Pieces Tray (Bottom Dock) */}
+      <div className="h-[130px] shrink-0 bg-card/85 border-t border-border/80 flex flex-col items-center justify-center px-4 py-2 relative z-20">
         <div className="flex items-center justify-between w-full max-w-md mb-1.5 px-2 text-xs">
-          <span className="font-bold text-muted-foreground">Pick or Drag a Piece:</span>
+          <span className="font-bold text-muted-foreground">Pick or Drag a Photo Slice:</span>
           <span className="text-[11px] text-primary font-bold">
-            {TOTAL_PIECES - placedCount} pieces remaining
+            {TOTAL_PIECES - placedCount} slices remaining
           </span>
         </div>
 
@@ -834,8 +746,6 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
             const row = Math.floor(piece.id / COLS);
             const col = piece.id % COLS;
-            const viewBoxX = col * PIECE_SIZE;
-            const viewBoxY = row * PIECE_SIZE;
             const isSelected = selectedPieceId === id;
             const isDragging = draggedPieceId === id;
 
@@ -854,24 +764,24 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                 }}
                 onClick={() => handlePieceClick(id)}
                 className={`
-                  relative rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing select-none
-                  border-2 transition-all duration-200 shadow-md hover:scale-110 hover:-translate-y-1
-                  ${isSelected ? 'border-primary ring-4 ring-primary/30 scale-110 -translate-y-1 z-10 shadow-xl' : 'border-card/90'}
+                  relative rounded-xl overflow-hidden cursor-grab active:cursor-grabbing select-none
+                  border-2 transition-all duration-200 shadow-lg hover:scale-110 hover:-translate-y-1
+                  ${isSelected ? 'border-primary ring-4 ring-primary/40 scale-110 -translate-y-1 z-10 shadow-2xl' : 'border-card/90'}
                   ${isDragging ? 'opacity-40' : 'opacity-100'}
                 `}
-                style={{ width: `${PIECE_SIZE}px`, height: `${PIECE_SIZE}px` }}
+                style={{
+                  width: `${PIECE_WIDTH}px`,
+                  height: `${PIECE_HEIGHT}px`,
+                  backgroundImage: `url(${currentScene.imageUrl})`,
+                  backgroundSize: `${BOARD_WIDTH}px ${BOARD_HEIGHT}px`,
+                  backgroundPosition: `-${col * PIECE_WIDTH}px -${row * PIECE_HEIGHT}px`,
+                  backgroundRepeat: 'no-repeat'
+                }}
                 title="Click or Drag onto board"
               >
-                <svg width={PIECE_SIZE} height={PIECE_SIZE} viewBox={`${viewBoxX} ${viewBoxY} ${PIECE_SIZE} ${PIECE_SIZE}`}>
-                  {sceneElements.map((el, i) => {
-                    const Comp = el.type as any;
-                    return <Comp key={i} {...el.props} />;
-                  })}
-                </svg>
-
                 {isSelected && (
-                  <div className="absolute top-1 right-1 h-3.5 w-3.5 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-2.5 w-2.5 text-primary-foreground stroke-[3]" />
+                  <div className="absolute top-1 right-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center shadow">
+                    <Check className="h-3 w-3 text-primary-foreground stroke-[3]" />
                   </div>
                 )}
               </div>
@@ -880,11 +790,86 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
 
           {hand.length === 0 && !isCompleted && placedCount < TOTAL_PIECES && (
             <div className="text-xs text-muted-foreground italic py-3">
-              Drawing final pieces...
+              Drawing final slices...
             </div>
           )}
         </div>
       </div>
+
+      {/* Select Photo / Custom Upload Modal */}
+      {showThemeModal && (
+        <div className="absolute inset-0 bg-background/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <Card className="max-w-2xl w-full glass-panel border border-border/80 shadow-2xl rounded-3xl overflow-hidden">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-black">Choose Puzzle Photo</h2>
+                  <p className="text-xs text-muted-foreground">Select from original high-resolution scenes or upload your own image</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowThemeModal(false)} className="rounded-xl">
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Upload Custom Photo Banner */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="p-4 rounded-2xl border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-between group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm block">Upload Your Own Photo</span>
+                    <span className="text-xs text-muted-foreground">Upload any picture from your device to create an instant custom puzzle</span>
+                  </div>
+                </div>
+                <Button size="sm" variant="secondary" className="rounded-xl font-bold text-xs pointer-events-none">
+                  Select File
+                </Button>
+              </div>
+
+              {/* Curated Gallery Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[340px] overflow-y-auto pr-1">
+                {scenes.map((scene) => {
+                  const isSelected = currentScene.id === scene.id;
+                  return (
+                    <div
+                      key={scene.id}
+                      onClick={() => {
+                        generatePuzzle(scene);
+                        setShowThemeModal(false);
+                      }}
+                      className={`
+                        relative rounded-2xl overflow-hidden border-2 cursor-pointer transition-all duration-200 group
+                        ${isSelected ? 'border-primary ring-2 ring-primary/30 shadow-lg' : 'border-border/70 hover:border-primary/50'}
+                      `}
+                    >
+                      <div className="aspect-[4/3] w-full overflow-hidden bg-slate-900">
+                        <img
+                          src={scene.imageUrl}
+                          alt={scene.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="p-2 bg-card/90 backdrop-blur-sm">
+                        <span className="text-[10px] text-primary font-bold block">{scene.tag}</span>
+                        <span className="text-xs font-bold truncate block">{scene.name}</span>
+                      </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow">
+                          <Check className="h-3 w-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Countdown Preview Overlay */}
       {showPreview && (
@@ -893,24 +878,23 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
             <CardContent className="p-7 space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                  Memorize the Scene
+                  Memorize the Photo
                 </span>
                 <h2 className="text-2xl font-black">{currentScene.name}</h2>
                 <p className="text-xs text-muted-foreground">{currentScene.description}</p>
               </div>
 
-              {/* Full Art Preview */}
+              {/* Real Photo Preview */}
               <div className="mx-auto rounded-2xl p-2 bg-card border border-border/70 shadow-lg w-fit">
                 <div
                   className="rounded-xl overflow-hidden"
-                  style={{ width: `${SCENE_WIDTH * 0.85}px`, height: `${SCENE_HEIGHT * 0.85}px` }}
+                  style={{ width: `${BOARD_WIDTH * 0.85}px`, height: `${BOARD_HEIGHT * 0.85}px` }}
                 >
-                  <svg width="100%" height="100%" viewBox={`0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`}>
-                    {sceneElements.map((el, i) => {
-                      const Comp = el.type as any;
-                      return <Comp key={i} {...el.props} />;
-                    })}
-                  </svg>
+                  <img
+                    src={currentScene.imageUrl}
+                    alt={currentScene.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
 
@@ -921,18 +905,28 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
                 <p className="text-xs text-muted-foreground font-medium">seconds remaining until start</p>
               </div>
 
-              <Button
-                onClick={() => {
-                  setShowPreview(false);
-                  setIsGameStarted(true);
-                  const allIds = pieces.map(p => p.id);
-                  const shuffled = [...allIds].sort(() => 0.5 - Math.random());
-                  setHand(shuffled.slice(0, 4));
-                }}
-                className="w-full rounded-2xl font-bold bg-primary text-primary-foreground"
-              >
-                Skip Preview & Play Now
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setShowPreview(false);
+                    setIsGameStarted(true);
+                    const allIds = pieces.map(p => p.id);
+                    const shuffled = [...allIds].sort(() => 0.5 - Math.random());
+                    setHand(shuffled.slice(0, 4));
+                  }}
+                  className="flex-1 rounded-2xl font-bold bg-primary text-primary-foreground"
+                >
+                  Start Solving
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowThemeModal(true)}
+                  className="rounded-2xl font-semibold gap-1.5"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Change Photo
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -945,7 +939,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
             <CardContent className="p-7 space-y-5">
               <div className="space-y-2">
                 <Trophy className="h-14 w-14 mx-auto text-yellow-500 animate-bounce" />
-                <h2 className="text-3xl font-black tracking-tight">Puzzle Solved!</h2>
+                <h2 className="text-3xl font-black tracking-tight">Puzzle Completed!</h2>
                 <div className="flex items-center justify-center gap-1.5 text-yellow-400">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <Star
@@ -1009,7 +1003,7 @@ export default function PuzzleGame({ onBack }: PuzzleGameProps) {
               <div className="flex gap-2">
                 <Button onClick={() => generatePuzzle()} className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold text-xs h-10">
                   <RotateCcw className="h-4 w-4 mr-1.5" />
-                  Play Next Puzzle
+                  Next Photo
                 </Button>
                 <Button onClick={onBack} variant="outline" className="flex-1 rounded-xl font-semibold text-xs h-10 gap-1.5">
                   <Gamepad2 className="h-4 w-4" />
