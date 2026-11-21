@@ -102,47 +102,60 @@ export function ContactSection() {
               </p>
 
               <div className="space-y-5">
-                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
-                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                <a
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=latifovtebriz@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Send email via Gmail"
+                  onClick={() => trackEvent('click', 'contact', 'email')}
+                  className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/50 hover:bg-card/90 transition-all group cursor-pointer block"
+                >
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0 group-hover:scale-105 group-hover:bg-primary/20 transition-all">
                     <Mail className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email</p>
-                    <a href="mailto:latifovtebriz@gmail.com" className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email (Gmail)</p>
+                    <span className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
                       latifovtebriz@gmail.com
-                    </a>
+                    </span>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
-                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                <a
+                  href="tel:+994507895282"
+                  aria-label="Call +994507895282"
+                  onClick={() => trackEvent('click', 'contact', 'phone')}
+                  className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/50 hover:bg-card/90 transition-all group cursor-pointer block"
+                >
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0 group-hover:scale-105 group-hover:bg-primary/20 transition-all">
                     <Phone className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone</p>
-                    <a href="tel:+994507895282" className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Phone / Call</p>
+                    <span className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
                       +994 50 789 52 82
-                    </a>
+                    </span>
                   </div>
-                </div>
+                </a>
 
-                <div className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/40 transition-colors">
-                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0">
+                <a
+                  href="https://www.linkedin.com/in/tabriz-latifov-544307260/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn Profile"
+                  className="flex items-center gap-4 p-3.5 rounded-2xl bg-card/60 border border-border/60 hover:border-primary/50 hover:bg-card/90 transition-all group cursor-pointer block"
+                  onClick={() => trackEvent('click', 'social_media', 'linkedin_contact')}
+                >
+                  <div className="p-2.5 bg-primary/10 rounded-xl text-primary shrink-0 group-hover:scale-105 group-hover:bg-primary/20 transition-all">
                     <Linkedin className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">LinkedIn</p>
-                    <a
-                      href="https://www.linkedin.com/in/tabriz-latifov-544307260/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm sm:text-base font-semibold text-foreground hover:text-primary transition-colors truncate block"
-                      onClick={() => trackEvent('click', 'social_media', 'linkedin_contact')}
-                    >
+                    <span className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate block">
                       linkedin.com/in/tabriz-latifov
-                    </a>
+                    </span>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
 

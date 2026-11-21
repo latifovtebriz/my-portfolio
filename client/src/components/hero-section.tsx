@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Github, Linkedin, Mail, Download } from "lucide-react";
+import { Github, Linkedin, Mail, Phone, Download } from "lucide-react";
 import { TypeAnimation } from "react-type-animation";
 import tabrizPhoto from "@/assets/profile-photo.jpg";
 import { trackEvent } from "@/lib/analytics";
@@ -109,12 +109,22 @@ export function HeroSection() {
               <Linkedin className="h-5 w-5" />
             </a>
             <a
-              href="mailto:latifovtebriz@gmail.com"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=latifovtebriz@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-3 rounded-xl bg-card/70 backdrop-blur-md border border-border/70 hover:border-primary/50 text-muted-foreground hover:text-primary hover:-translate-y-1 hover:shadow-md transition-all duration-200"
-              aria-label="Email"
+              aria-label="Email via Gmail"
               onClick={() => trackEvent("click", "social_media", "email")}
             >
               <Mail className="h-5 w-5" />
+            </a>
+            <a
+              href="tel:+994507895282"
+              className="p-3 rounded-xl bg-card/70 backdrop-blur-md border border-border/70 hover:border-primary/50 text-muted-foreground hover:text-primary hover:-translate-y-1 hover:shadow-md transition-all duration-200"
+              aria-label="Call +994507895282"
+              onClick={() => trackEvent("click", "social_media", "phone")}
+            >
+              <Phone className="h-5 w-5" />
             </a>
           </div>
         </div>

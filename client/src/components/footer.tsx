@@ -38,15 +38,17 @@ export function Footer() {
               <Linkedin className="h-5 w-5" />
             </a>
             <a
-              href="mailto:latifovtebriz@gmail.com"
-              aria-label="Email"
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=latifovtebriz@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Email via Gmail"
               className="p-3 rounded-xl bg-card border border-border/70 text-muted-foreground hover:text-primary hover:border-primary/50 hover:-translate-y-0.5 transition-all shadow-sm"
             >
               <Mail className="h-5 w-5" />
             </a>
             <a
               href="tel:+994507895282"
-              aria-label="Phone"
+              aria-label="Call +994507895282"
               className="p-3 rounded-xl bg-card border border-border/70 text-muted-foreground hover:text-primary hover:border-primary/50 hover:-translate-y-0.5 transition-all shadow-sm"
             >
               <Phone className="h-5 w-5" />
