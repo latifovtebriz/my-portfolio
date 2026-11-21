@@ -21,6 +21,7 @@ import BrickBreakerGame from "../components/brick-breaker-game";
 import SpaceDefenderGame from "../components/space-defender-game";
 import StackTowerGame from "../components/stack-tower-game";
 import ConnectFourGame from "../components/connect-four-game";
+import MinesweeperGame from "../components/minesweeper-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -151,6 +152,13 @@ export default function Games() {
       description: "Tactical 4-in-a-row with Minimax AI, alpha-beta pruning, 2-player mode, and token bounce physics!",
       icon: "🔴",
       component: ConnectFourGame,
+    },
+    {
+      id: "minesweeper",
+      title: "Minesweeper Pro",
+      description: "Classic logic puzzle with first-click safety, flood-fill queues, chording, and LED counters!",
+      icon: "💣",
+      component: MinesweeperGame,
     },
   ];
 
