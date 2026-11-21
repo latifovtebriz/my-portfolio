@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Trophy, List, Clock, Zap, ChevronLeft, ChevronRight, ArrowUp, 
-  Volume2, VolumeX, Sparkles, RefreshCw, Flame, Snowflake, Shield, User
+  Volume2, VolumeX, Sparkles, RefreshCw, Flame, Snowflake, Shield, User,
+  Gamepad2, CheckCircle2
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PartySocket from "partysocket";
@@ -656,7 +657,25 @@ function updateBallPhysics(
   const leftCrossbarX = GOAL_WIDTH + GOAL_DEPTH;
   const rightCrossbarX = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
 
-  // Left Crossbar hit
+  // 1. Solid Left Goal Roof (Impenetrable crossbar and net roof from above)
+  if (b.x <= leftCrossbarX + 4) {
+    if (b.y + b.radius >= goalTop && b.vy > 0 && b.y < goalTop + 35) {
+      b.y = goalTop - b.radius;
+      b.vy = -Math.abs(b.vy) * BALL_BOUNCE;
+      if (Math.abs(b.vy) > 2) sound.playCrossbar();
+    }
+  }
+
+  // 2. Solid Right Goal Roof (Impenetrable crossbar and net roof from above)
+  if (b.x >= rightCrossbarX - 4) {
+    if (b.y + b.radius >= goalTop && b.vy > 0 && b.y < goalTop + 35) {
+      b.y = goalTop - b.radius;
+      b.vy = -Math.abs(b.vy) * BALL_BOUNCE;
+      if (Math.abs(b.vy) > 2) sound.playCrossbar();
+    }
+  }
+
+  // 3. Left Goal Corner & Front Post Hit
   const distLeftPost = distance(b.x, b.y, leftCrossbarX, goalTop);
   if (distLeftPost < b.radius + GOAL_POST_WIDTH) {
     const angle = Math.atan2(b.y - goalTop, b.x - leftCrossbarX);
@@ -665,7 +684,7 @@ function updateBallPhysics(
     sound.playCrossbar();
   }
 
-  // Right Crossbar hit
+  // 4. Right Goal Corner & Front Post Hit
   const distRightPost = distance(b.x, b.y, rightCrossbarX, goalTop);
   if (distRightPost < b.radius + GOAL_POST_WIDTH) {
     const angle = Math.atan2(b.y - goalTop, b.x - rightCrossbarX);
@@ -777,13 +796,14 @@ function handleKickingAndCollision(
 
 function checkGoal(ball: Ball): 'player1' | 'player2' | null {
   const goalTop = GROUND_Y - GOAL_HEIGHT;
-  const leftGoalLine = GOAL_WIDTH;
-  const rightGoalLine = GAME_WIDTH - GOAL_WIDTH;
+  const leftGoalLine = GOAL_WIDTH + 8;
+  const rightGoalLine = GAME_WIDTH - GOAL_WIDTH - 8;
 
-  if (ball.x < leftGoalLine && ball.y > goalTop && ball.y < GROUND_Y) {
+  // Ball must enter through the mouth, strictly below the crossbar and above pitch
+  if (ball.x < leftGoalLine && ball.y > goalTop + ball.radius + 6 && ball.y < GROUND_Y) {
     return 'player2';
   }
-  if (ball.x > rightGoalLine && ball.y > goalTop && ball.y < GROUND_Y) {
+  if (ball.x > rightGoalLine && ball.y > goalTop + ball.radius + 6 && ball.y < GROUND_Y) {
     return 'player1';
   }
   return null;
@@ -1486,6 +1506,7 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
   // Score submission
   const [playerName, setPlayerName] = useState<string>("");
   const [showScoreSubmit, setShowScoreSubmit] = useState<boolean>(false);
+  const [scoreSubmitted, setScoreSubmitted] = useState<boolean>(false);
 
   // Mobile Touch Controls
   const touchControlsRef = useRef<KeyState>({
@@ -1517,25 +1538,43 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
   const { data: topScores = [] } = useQuery({
     queryKey: ['/api/games/headball/scores'],
     queryFn: async () => {
+      let localList: any[] = [];
       try {
-        const response = await fetch('/api/games/headball/scores?limit=5');
-        if (!response.ok) throw new Error('Failed');
-        return await response.json();
-      } catch {
-        // Fallback local mock leaderboard
-        return [
-          { id: 1, playerName: "Leo 🐐", score: 8, timeInSeconds: 90 },
-          { id: 2, playerName: "CR7 ⚡", score: 7, timeInSeconds: 90 },
-          { id: 3, playerName: "Baku AI 🤖", score: 6, timeInSeconds: 90 },
-          { id: 4, playerName: "Kylian 👑", score: 5, timeInSeconds: 90 },
-          { id: 5, playerName: "Tabriz ⚽", score: 4, timeInSeconds: 90 },
-        ];
-      }
+        const stored = localStorage.getItem('headball_scores_local');
+        if (stored) localList = JSON.parse(stored);
+      } catch {}
+
+      try {
+        const response = await fetch('/api/games/headball/scores?limit=10');
+        if (response.ok) {
+          const apiScores = (await response.json()) as any[];
+          const combined = [...localList, ...(Array.isArray(apiScores) ? apiScores : [])];
+          const unique = Array.from(new Map(combined.map(item => [item.playerName + '-' + item.score, item])).values());
+          return unique.sort((a, b) => b.score - a.score).slice(0, 5);
+        }
+      } catch {}
+
+      const defaults = [
+        { id: 1, playerName: "Leo 🐐", score: 8, timeInSeconds: 90 },
+        { id: 2, playerName: "CR7 ⚡", score: 7, timeInSeconds: 90 },
+        { id: 3, playerName: "Baku AI 🤖", score: 6, timeInSeconds: 90 },
+        { id: 4, playerName: "Kylian 👑", score: 5, timeInSeconds: 90 },
+        { id: 5, playerName: "Tabriz ⚽", score: 4, timeInSeconds: 90 },
+      ];
+      const merged = [...localList, ...defaults];
+      return merged.sort((a, b) => b.score - a.score).slice(0, 5);
     }
   });
 
   const submitScoreMutation = useMutation({
     mutationFn: async (scoreData: { playerName: string; score: number; timeInSeconds: number }) => {
+      try {
+        const stored = localStorage.getItem('headball_scores_local');
+        const list = stored ? JSON.parse(stored) : [];
+        list.unshift({ ...scoreData, id: Date.now(), createdAt: new Date().toISOString() });
+        localStorage.setItem('headball_scores_local', JSON.stringify(list.slice(0, 20)));
+      } catch {}
+
       const response = await fetch('/api/games/headball/scores', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1546,9 +1585,12 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/games/headball/scores'] });
-      setShowScoreSubmit(false);
-      setPlayerName("");
+      setScoreSubmitted(true);
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/games/headball/scores'] });
+      setScoreSubmitted(true);
+    }
   });
 
   // PartyKit Multiplayer Configuration
@@ -1627,14 +1669,25 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
   // Start match
   const startGame = (mode: 'ai' | 'local' | 'online') => {
     setPlayMode(mode);
+    setScoreSubmitted(false);
+    setShowScoreSubmit(false);
     setGameState(createInitialGameState(p1Character, p2Character));
     setGameMode('playing');
     sound.playWhistle('double');
   };
 
+  const finishMatchEarly = () => {
+    sound.playWhistle('long');
+    setGameMode('gameOver');
+    setShowScoreSubmit(true);
+    setScoreSubmitted(false);
+  };
+
   const resetGame = () => {
     if (wsRef.current) wsRef.current.close();
     setGameMode('menu');
+    setScoreSubmitted(false);
+    setShowScoreSubmit(false);
     setGameState(createInitialGameState(p1Character, p2Character));
   };
 
@@ -2154,16 +2207,39 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     <div className="fixed inset-0 bg-background flex flex-col select-none overflow-hidden">
       {/* Top TV Broadcast Scoreboard */}
       <div className="flex items-center justify-between px-3 py-2 sm:px-6 sm:py-3 bg-card/85 backdrop-blur-md border-b border-border/80 shadow-sm shrink-0 z-20">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {onBack && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onBack}
+              className="h-8 px-2.5 rounded-xl text-xs font-bold gap-1.5 shadow-sm border border-border/70 hover:bg-primary hover:text-primary-foreground transition-colors"
+              title="Return to My Games"
+            >
+              <Gamepad2 className="h-3.5 w-3.5 text-primary" />
+              <span className="hidden sm:inline">My Games</span>
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={resetGame} className="h-8 px-2.5 rounded-xl text-xs font-semibold">
             ← Menu
           </Button>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 border border-border/60">
+          <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-muted/60 border border-border/60">
             <Clock className="h-3.5 w-3.5 text-primary" />
-            <span className="font-mono font-bold text-sm">
+            <span className="font-mono font-bold text-xs sm:text-sm">
               {Math.floor(gameState.timeLeft / 60)}:{(gameState.timeLeft % 60).toString().padStart(2, '0')}
             </span>
           </div>
+          {playMode === 'ai' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={finishMatchEarly}
+              className="h-8 px-2.5 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hidden sm:flex items-center gap-1 border border-border/50 hover:bg-muted"
+              title="Finish match early and save score"
+            >
+              <span>🏁 End & Save</span>
+            </Button>
+          )}
         </div>
 
         {/* Dynamic Match Score */}
@@ -2355,26 +2431,57 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
                 </p>
               </div>
 
-              <div className="space-y-3 pt-2">
-                <Input
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Enter your name for the Hall of Fame"
-                  className="rounded-xl text-center font-bold"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleSubmitScore}
-                    disabled={!playerName.trim() || submitScoreMutation.isPending}
-                    className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold"
-                  >
-                    {submitScoreMutation.isPending ? "Recording..." : "Save Record"}
-                  </Button>
-                  <Button onClick={resetGame} variant="outline" className="rounded-xl font-semibold">
-                    Menu
-                  </Button>
+              {scoreSubmitted ? (
+                <div className="space-y-4 pt-2">
+                  <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex flex-col items-center gap-1.5">
+                    <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+                    <span className="font-bold text-sm">Result Successfully Recorded!</span>
+                    <span className="text-xs text-muted-foreground">Your score has been saved to the Hall of Fame.</span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => startGame(playMode)} className="w-full rounded-xl bg-primary text-primary-foreground font-bold">
+                      Play Rematch
+                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={resetGame} variant="outline" className="flex-1 rounded-xl font-semibold">
+                        Leaderboard & Menu
+                      </Button>
+                      {onBack && (
+                        <Button onClick={onBack} variant="secondary" className="flex-1 rounded-xl font-semibold gap-1.5">
+                          <Gamepad2 className="h-4 w-4" />
+                          All Games
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3 pt-2">
+                  <Input
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    placeholder="Enter your name for the Hall of Fame"
+                    className="rounded-xl text-center font-bold"
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleSubmitScore}
+                      disabled={!playerName.trim() || submitScoreMutation.isPending}
+                      className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold"
+                    >
+                      {submitScoreMutation.isPending ? "Recording..." : "Save Record"}
+                    </Button>
+                    <Button onClick={resetGame} variant="outline" className="rounded-xl font-semibold">
+                      Menu
+                    </Button>
+                  </div>
+                  {onBack && (
+                    <Button onClick={onBack} variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-foreground">
+                      ← Back to All Games
+                    </Button>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
