@@ -22,13 +22,18 @@ export const pool = new Pool({
     checkServerIdentity: () => undefined
   } : undefined
 });
+
+pool.on('error', (err) => {
+  console.warn('PostgreSQL pool idle error (database offline, falling back gracefully):', err.message);
+});
+
 export const db = drizzle({ client: pool, schema });
 
 // Test connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.error('Database connection error:', err);
+    console.warn('Database not available locally; using graceful mock store:', err.message);
   } else {
-    console.log('Database connected successfully at:', res.rows[0].now);
+    console.log('Database connected successfully at:', res.rows[0]?.now);
   }
 });

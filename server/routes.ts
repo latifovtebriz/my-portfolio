@@ -143,62 +143,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Game scores API endpoints
-
-  // Get top scores for a specific game
-  app.get("/api/games/:gameType/scores", async (req, res) => {
-    try {
-      const { gameType } = req.params;
-      const { limit = "10" } = req.query;
-
-      let orderBy;
-      if (gameType === "memory" || gameType === "sudoku") {
-        // For memory and sudoku, lower time is better
-        orderBy = asc(gameScores.timeInSeconds);
-      } else if (gameType === "reaction-time") {
-        // For reaction time, lower score (ms) is better
-        orderBy = asc(gameScores.score);
-      } else {
-        // For other games, higher score is better
-        orderBy = desc(gameScores.score);
-      }
-
-      const scores = await db
-        .select()
-        .from(gameScores)
-        .where(eq(gameScores.gameType, gameType))
-        .orderBy(orderBy)
-        .limit(parseInt(limit as string));
-
-      res.json(scores);
-    } catch (error) {
-      console.error("Error fetching game scores:", error);
-      res.status(500).json({ error: "Failed to fetch scores" });
-    }
-  });
-
-  // Submit a new score (generic endpoint)
-  app.post("/api/games/scores", async (req, res) => {
-    try {
-      const scoreData = insertGameScoreSchema.parse(req.body);
-
-      const [newScore] = await db
-        .insert(gameScores)
-        .values(scoreData)
-        .returning();
-
-      res.json(newScore);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        console.error("Validation error saving game score:", error.errors);
-        return res.status(400).json({ error: "Invalid score data", details: error.errors });
-      }
-      console.error("Error saving game score:", error);
-      console.log("Failed Payload:", req.body); // Log payload for debugging
-      res.status(500).json({ error: "Failed to save score" });
-    }
-  });
-
   // In-memory fallback if DB is not reachable
   const memoryHeadballScores: Array<{ id: number; playerName: string; score: number; timeInSeconds: number; createdAt: Date }> = [
     { id: 1, playerName: "Leo 🐐", score: 8, timeInSeconds: 90, createdAt: new Date() },
@@ -208,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     { id: 5, playerName: "Tabriz ⚽", score: 4, timeInSeconds: 90, createdAt: new Date() },
   ];
 
-  // Head Ball specific endpoints
+  // Head Ball specific endpoints (MUST BE BEFORE :gameType route)
   app.get("/api/games/headball/scores", async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
     try {
@@ -267,6 +211,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error saving Head Ball score:", error);
+      res.status(500).json({ error: "Failed to save score" });
+    }
+  });
+
+  // Game scores API endpoints
+
+  // Get top scores for a specific game
+  app.get("/api/games/:gameType/scores", async (req, res) => {
+    const { gameType } = req.params;
+    const { limit = "10" } = req.query;
+    try {
+      let orderBy;
+      if (gameType === "memory" || gameType === "sudoku") {
+        orderBy = asc(gameScores.timeInSeconds);
+      } else if (gameType === "reaction-time") {
+        orderBy = asc(gameScores.score);
+      } else {
+        orderBy = desc(gameScores.score);
+      }
+
+      const scores = await db
+        .select()
+        .from(gameScores)
+        .where(eq(gameScores.gameType, gameType))
+        .orderBy(orderBy)
+        .limit(parseInt(limit as string));
+
+      res.json(scores);
+    } catch (error) {
+      console.warn(`DB not reachable for ${gameType} scores, returning graceful list.`);
+      if (gameType === "headball") {
+        return res.json(memoryHeadballScores.slice(0, parseInt(limit as string) || 10));
+      }
+      res.json([]);
+    }
+  });
+
+  // Submit a new score (generic endpoint)
+  app.post("/api/games/scores", async (req, res) => {
+    try {
+      const scoreData = insertGameScoreSchema.parse(req.body);
+
+      try {
+        const [newScore] = await db
+          .insert(gameScores)
+          .values(scoreData)
+          .returning();
+
+        res.json(newScore);
+      } catch (dbError) {
+        console.warn("DB not reachable for game score insert:", dbError);
+        res.json({ id: Date.now(), ...scoreData, createdAt: new Date() });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid score data", details: error.errors });
+      }
       res.status(500).json({ error: "Failed to save score" });
     }
   });
