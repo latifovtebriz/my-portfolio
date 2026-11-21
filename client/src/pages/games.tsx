@@ -24,6 +24,7 @@ import ConnectFourGame from "../components/connect-four-game";
 import MinesweeperGame from "../components/minesweeper-game";
 import WordleGame from "../components/wordle-game";
 import PacmanGame from "../components/pacman-game";
+import BackgammonGame from "../components/backgammon-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -175,6 +176,13 @@ export default function Games() {
       description: "Retro arcade maze navigation with canonical ghost personalities, power pellets, and Web Audio synthesis!",
       icon: "🟡",
       component: PacmanGame,
+    },
+    {
+      id: "backgammon",
+      title: "Backgammon Pro",
+      description: "Grandmaster Tavla / Nərd with standard and long variants, smart AI, dice animations, and blot hitting!",
+      icon: "🎲",
+      component: BackgammonGame,
     },
   ];
 
