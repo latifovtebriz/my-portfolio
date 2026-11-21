@@ -22,6 +22,7 @@ import SpaceDefenderGame from "../components/space-defender-game";
 import StackTowerGame from "../components/stack-tower-game";
 import ConnectFourGame from "../components/connect-four-game";
 import MinesweeperGame from "../components/minesweeper-game";
+import WordleGame from "../components/wordle-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -159,6 +160,13 @@ export default function Games() {
       description: "Classic logic puzzle with first-click safety, flood-fill queues, chording, and LED counters!",
       icon: "💣",
       component: MinesweeperGame,
+    },
+    {
+      id: "wordle",
+      title: "Wordle Cyber",
+      description: "Guess the hidden English word in 6 tries with color hints, virtual keyboard, daily and practice modes!",
+      icon: "🔤",
+      component: WordleGame,
     },
   ];
 
