@@ -59,8 +59,8 @@ export default function Games() {
     },
     {
       id: "flappy-bird",
-      title: "Flappy Bird",
-      description: "Tap to keep the bird in the air and navigate through pipes!",
+      title: "Flappy Bird Pro",
+      description: "Arcade flight with animated vector bird, customizable skins, flight medals, and sound effects!",
       icon: "🐦",
       component: FlappyBirdGame,
     },
