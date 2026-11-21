@@ -23,6 +23,7 @@ import StackTowerGame from "../components/stack-tower-game";
 import ConnectFourGame from "../components/connect-four-game";
 import MinesweeperGame from "../components/minesweeper-game";
 import WordleGame from "../components/wordle-game";
+import PacmanGame from "../components/pacman-game";
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
@@ -167,6 +168,13 @@ export default function Games() {
       description: "Guess the hidden English word in 6 tries with color hints, virtual keyboard, daily and practice modes!",
       icon: "🔤",
       component: WordleGame,
+    },
+    {
+      id: "pacman",
+      title: "Pac-Man Pro",
+      description: "Retro arcade maze navigation with canonical ghost personalities, power pellets, and Web Audio synthesis!",
+      icon: "🟡",
+      component: PacmanGame,
     },
   ];
 
