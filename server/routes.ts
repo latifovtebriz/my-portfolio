@@ -199,11 +199,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // In-memory fallback if DB is not reachable
+  const memoryHeadballScores: Array<{ id: number; playerName: string; score: number; timeInSeconds: number; createdAt: Date }> = [
+    { id: 1, playerName: "Leo 🐐", score: 8, timeInSeconds: 90, createdAt: new Date() },
+    { id: 2, playerName: "CR7 ⚡", score: 7, timeInSeconds: 90, createdAt: new Date() },
+    { id: 3, playerName: "Baku AI 🤖", score: 6, timeInSeconds: 90, createdAt: new Date() },
+    { id: 4, playerName: "Kylian 👑", score: 5, timeInSeconds: 90, createdAt: new Date() },
+    { id: 5, playerName: "Tabriz ⚽", score: 4, timeInSeconds: 90, createdAt: new Date() },
+  ];
+
   // Head Ball specific endpoints
   app.get("/api/games/headball/scores", async (req, res) => {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
     try {
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-
       const scores = await db
         .select({
           id: gameScores.id,
@@ -215,12 +223,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(gameScores)
         .where(eq(gameScores.gameType, 'headball'))
         .orderBy(desc(gameScores.score))
-        .limit(limit || 100);
+        .limit(limit);
 
       res.json(scores);
     } catch (error) {
-      console.error("Error fetching Head Ball scores:", error);
-      res.status(500).json({ error: "Failed to fetch scores" });
+      console.warn("DB not reachable for Head Ball scores, serving fallback records.");
+      res.json(memoryHeadballScores.slice(0, limit));
     }
   });
 
@@ -232,17 +240,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid score data" });
       }
 
-      const [newScore] = await db
-        .insert(gameScores)
-        .values({
+      try {
+        const [newScore] = await db
+          .insert(gameScores)
+          .values({
+            playerName,
+            gameType: 'headball',
+            score,
+            timeInSeconds,
+          })
+          .returning();
+
+        return res.json(newScore);
+      } catch (dbError) {
+        console.warn("DB insert failed, storing in memory:", dbError);
+        const newScore = {
+          id: memoryHeadballScores.length + 1,
           playerName,
-          gameType: 'headball',
           score,
           timeInSeconds,
-        })
-        .returning();
-
-      res.json(newScore);
+          createdAt: new Date(),
+        };
+        memoryHeadballScores.unshift(newScore);
+        memoryHeadballScores.sort((a, b) => b.score - a.score);
+        return res.json(newScore);
+      }
     } catch (error) {
       console.error("Error saving Head Ball score:", error);
       res.status(500).json({ error: "Failed to save score" });

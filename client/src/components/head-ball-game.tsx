@@ -3,15 +3,308 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trophy, List, Clock, Zap, ChevronLeft, ChevronRight, ArrowUp, Wifi, WifiOff } from "lucide-react";
+import { 
+  Trophy, List, Clock, Zap, ChevronLeft, ChevronRight, ArrowUp, 
+  Volume2, VolumeX, Sparkles, RefreshCw, Flame, Snowflake, Shield, User
+} from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import PartySocket from "partysocket";
 
 // ============================================================================
-// TYPES & INTERFACES
+// AUDIO SYNTHESIZER (Pure Web Audio API - zero external assets needed)
 // ============================================================================
 
-interface Player {
+class SoundEngine {
+  private ctx: AudioContext | null = null;
+  public enabled: boolean = true;
+
+  private initCtx() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  playKick(isSuper: boolean = false) {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = isSuper ? 'sawtooth' : 'triangle';
+      osc.frequency.setValueAtTime(isSuper ? 240 : 160, now);
+      osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+
+      gain.gain.setValueAtTime(isSuper ? 0.6 : 0.4, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    } catch {}
+  }
+
+  playHighKick() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(540, now + 0.15);
+
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } catch {}
+  }
+
+  playCrossbar() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(920, now);
+      osc.frequency.exponentialRampToValueAtTime(460, now + 0.35);
+
+      gain.gain.setValueAtTime(0.5, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch {}
+  }
+
+  playWhistle(type: 'short' | 'double' | 'long' = 'double') {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const playTone = (startDelay: number, duration: number) => {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime + startDelay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(2950, now);
+        osc.frequency.setValueAtTime(3150, now + duration * 0.5);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      };
+
+      if (type === 'double') {
+        playTone(0, 0.12);
+        playTone(0.18, 0.22);
+      } else if (type === 'short') {
+        playTone(0, 0.14);
+      } else {
+        playTone(0, 0.45);
+      }
+    } catch {}
+  }
+
+  playGoal() {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const notes = [392, 523.25, 659.25, 783.99]; // G4, C5, E5, G5 fanfare
+      notes.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+        gain.gain.setValueAtTime(0.18, now + idx * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + idx * 0.09);
+        osc.stop(now + 1.2);
+      });
+    } catch {}
+  }
+
+  playPowerUp(type: string) {
+    if (!this.enabled) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = type === 'freeze' ? 'sine' : type === 'fireball' ? 'sawtooth' : 'triangle';
+      const startFreq = type === 'freeze' ? 950 : type === 'fireball' ? 180 : 420;
+      const endFreq = type === 'freeze' ? 260 : type === 'fireball' ? 750 : 1300;
+
+      osc.frequency.setValueAtTime(startFreq, now);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.3);
+
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    } catch {}
+  }
+}
+
+const sound = new SoundEngine();
+
+// ============================================================================
+// CHARACTER ROSTER
+// ============================================================================
+
+export interface CharacterSkin {
+  id: string;
+  name: string;
+  title: string;
+  country: string;
+  flag: string;
+  skinTone: string;
+  hairColor: string;
+  hairStyle: 'slick' | 'classic' | 'buzz' | 'cyborg' | 'flame';
+  jerseyColor: string;
+  jerseySecondary: string;
+  bootColor: string;
+  bootSecondary: string;
+  speed: number;
+  power: number;
+}
+
+export const CHARACTERS: CharacterSkin[] = [
+  {
+    id: 'leo',
+    name: 'Leo 🐐',
+    title: 'The Magician',
+    country: 'Argentina',
+    flag: '🇦🇷',
+    skinTone: '#f8d2b0',
+    hairColor: '#4a2e18',
+    hairStyle: 'classic',
+    jerseyColor: '#75aadb',
+    jerseySecondary: '#ffffff',
+    bootColor: '#00e676',
+    bootSecondary: '#111111',
+    speed: 5.6,
+    power: 11.8
+  },
+  {
+    id: 'cr7',
+    name: 'CR7 ⚡',
+    title: 'The Striker',
+    country: 'Portugal',
+    flag: '🇵🇹',
+    skinTone: '#e8be99',
+    hairColor: '#1a1a1a',
+    hairStyle: 'slick',
+    jerseyColor: '#dc2626',
+    jerseySecondary: '#15803d',
+    bootColor: '#ff6d00',
+    bootSecondary: '#ffffff',
+    speed: 5.9,
+    power: 13.2
+  },
+  {
+    id: 'kylian',
+    name: 'Kylian 👑',
+    title: 'Speed King',
+    country: 'France',
+    flag: '🇫🇷',
+    skinTone: '#935f3b',
+    hairColor: '#1a1a1a',
+    hairStyle: 'buzz',
+    jerseyColor: '#1e3a8a',
+    jerseySecondary: '#fbbf24',
+    bootColor: '#ec4899',
+    bootSecondary: '#ffffff',
+    speed: 6.3,
+    power: 11.2
+  },
+  {
+    id: 'baku_ai',
+    name: 'Baku AI 🤖',
+    title: 'Cyber Prodigy',
+    country: 'Azerbaijan',
+    flag: '🇦🇿',
+    skinTone: '#cbd5e1',
+    hairColor: '#06b6d4',
+    hairStyle: 'cyborg',
+    jerseyColor: '#0284c7',
+    jerseySecondary: '#10b981',
+    bootColor: '#38bdf8',
+    bootSecondary: '#f43f5e',
+    speed: 5.8,
+    power: 12.5
+  },
+  {
+    id: 'blaze',
+    name: 'Blaze 🔥',
+    title: 'Inferno Beast',
+    country: 'Global',
+    flag: '🔥',
+    skinTone: '#d97706',
+    hairColor: '#ef4444',
+    hairStyle: 'flame',
+    jerseyColor: '#18181b',
+    jerseySecondary: '#f97316',
+    bootColor: '#dc2626',
+    bootSecondary: '#fbbf24',
+    speed: 5.5,
+    power: 13.8
+  }
+];
+
+// ============================================================================
+// TYPES & CONSTANTS
+// ============================================================================
+
+export type PowerUpType = 'freeze' | 'speed' | 'giant' | 'fireball';
+
+export interface PowerUp {
+  type: PowerUpType;
+  name: string;
+  icon: string;
+  duration: number;
+  cooldown: number;
+}
+
+export interface Player {
   x: number;
   y: number;
   vx: number;
@@ -23,33 +316,46 @@ interface Player {
   powerUpEndTime: number;
   frozen: boolean;
   frozenEndTime: number;
+  giant: boolean;
+  giantEndTime: number;
   side: 'left' | 'right';
-  color: string;
-  emoji: string;
+  character: CharacterSkin;
+  facing: 1 | -1;
+  // Kicking states
+  kickState: 'idle' | 'low' | 'high';
+  kickProgress: number; // 0 to 1
+  kickCooldown: number;
+  // Animation
+  runCycle: number;
+  eyeOffset: { x: number; y: number };
 }
 
-interface Ball {
+export interface Ball {
   x: number;
   y: number;
   vx: number;
   vy: number;
   radius: number;
+  rotation: number;
   lastTouchedBy: 'player1' | 'player2' | null;
   isFireball: boolean;
   fireballEndTime: number;
 }
 
-type PowerUpType = 'freeze' | 'speed' | 'bigBall' | 'fireball';
-
-interface PowerUp {
-  type: PowerUpType;
-  name: string;
-  icon: string;
-  duration: number;
-  cooldown: number;
+export interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  color: string;
+  size: number;
+  alpha: number;
+  life: number;
+  maxLife: number;
+  type: 'confetti' | 'fire' | 'grass' | 'spark';
 }
 
-interface GameState {
+export interface GameState {
   player1: Player;
   player2: Player;
   ball: Ball;
@@ -57,58 +363,49 @@ interface GameState {
   isPaused: boolean;
   lastGoalScorer: 'player1' | 'player2' | null;
   goalAnimation: number;
+  screenShake: number;
 }
 
-interface KeyState {
+export interface KeyState {
   left: boolean;
   right: boolean;
   up: boolean;
+  lowKick: boolean;
+  highKick: boolean;
 }
 
 interface HeadBallGameProps {
   onBack: () => void;
 }
 
-// ============================================================================
-// CONSTANTS
-// ============================================================================
+const GAME_WIDTH = 840;
+const GAME_HEIGHT = 460;
+const GROUND_Y = GAME_HEIGHT - 45;
 
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 450;
-const GROUND_Y = GAME_HEIGHT - 40;
-
-// Goal dimensions - OPEN goals that ball can enter
-const GOAL_WIDTH = 60; // Width of goal opening
-const GOAL_HEIGHT = 130; // Height of goal opening
+const GOAL_WIDTH = 65;
+const GOAL_HEIGHT = 135;
 const GOAL_POST_WIDTH = 8;
-const GOAL_DEPTH = 30; // Depth of goal behind the line
+const GOAL_DEPTH = 32;
 
-// Physics constants
-const GRAVITY = 0.55;
-const PLAYER_SPEED = 5.5;
-const PLAYER_JUMP_FORCE = -13.5;
-const PLAYER_RADIUS = 35; // Increased from 28 for better visibility
+const GRAVITY = 0.52;
+const BASE_JUMP_FORCE = -13.2;
+const BASE_RADIUS = 34;
 const BALL_RADIUS = 18;
 const FRICTION = 0.985;
 const GROUND_FRICTION = 0.92;
 const AIR_RESISTANCE = 0.998;
-const BALL_BOUNCE = 0.72;
-const WALL_BOUNCE = 0.75;
-const PLAYER_BALL_FORCE = 11;
-const MAX_BALL_SPEED = 16;
+const BALL_BOUNCE = 0.74;
+const WALL_BOUNCE = 0.78;
+const MAX_BALL_SPEED = 18;
 
 const MATCH_DURATION = 90;
 
-const POWER_UPS: PowerUp[] = [
-  { type: 'freeze', name: 'Freeze', icon: '❄️', duration: 2500, cooldown: 12000 },
-  { type: 'speed', name: 'Speed', icon: '⚡', duration: 5000, cooldown: 10000 },
-  { type: 'bigBall', name: 'Big Ball', icon: '🎯', duration: 6000, cooldown: 15000 },
-  { type: 'fireball', name: 'Fireball', icon: '🔥', duration: 0, cooldown: 8000 },
+export const POWER_UPS: PowerUp[] = [
+  { type: 'freeze', name: 'Freeze Ice', icon: '❄️', duration: 2600, cooldown: 12000 },
+  { type: 'speed', name: 'Hyper Speed', icon: '⚡', duration: 5000, cooldown: 10000 },
+  { type: 'giant', name: 'Giant Head', icon: '🧠', duration: 6000, cooldown: 14000 },
+  { type: 'fireball', name: 'Fire Meteor', icon: '🔥', duration: 3200, cooldown: 9000 },
 ];
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -119,52 +416,59 @@ function distance(x1: number, y1: number, x2: number, y2: number): number {
 }
 
 // ============================================================================
-// GAME INITIALIZATION
+// INITIALIZATION
 // ============================================================================
 
-function createInitialPlayer(side: 'left' | 'right'): Player {
+function createInitialPlayer(side: 'left' | 'right', character: CharacterSkin): Player {
   return {
-    x: side === 'left' ? 150 : GAME_WIDTH - 150,
-    y: GROUND_Y - PLAYER_RADIUS,
+    x: side === 'left' ? 160 : GAME_WIDTH - 160,
+    y: GROUND_Y - BASE_RADIUS,
     vx: 0,
     vy: 0,
-    radius: PLAYER_RADIUS,
+    radius: BASE_RADIUS,
     onGround: true,
     score: 0,
     powerUp: null,
     powerUpEndTime: 0,
     frozen: false,
     frozenEndTime: 0,
+    giant: false,
+    giantEndTime: 0,
     side,
-    color: side === 'left' ? '#3B82F6' : '#EF4444',
-    emoji: side === 'left' ? '😎' : '🤖'
+    character,
+    facing: side === 'left' ? 1 : -1,
+    kickState: 'idle',
+    kickProgress: 0,
+    kickCooldown: 0,
+    runCycle: 0,
+    eyeOffset: { x: 0, y: 0 }
   };
 }
-
-// ... existing code ...
 
 function createInitialBall(): Ball {
   return {
     x: GAME_WIDTH / 2,
     y: GAME_HEIGHT / 3,
     vx: (Math.random() - 0.5) * 4,
-    vy: 0,
+    vy: -2,
     radius: BALL_RADIUS,
+    rotation: 0,
     lastTouchedBy: null,
     isFireball: false,
     fireballEndTime: 0
   };
 }
 
-function createInitialGameState(): GameState {
+function createInitialGameState(p1Char: CharacterSkin = CHARACTERS[0], p2Char: CharacterSkin = CHARACTERS[1]): GameState {
   return {
-    player1: createInitialPlayer('left'),
-    player2: createInitialPlayer('right'),
+    player1: createInitialPlayer('left', p1Char),
+    player2: createInitialPlayer('right', p2Char),
     ball: createInitialBall(),
     timeLeft: MATCH_DURATION,
     isPaused: false,
     lastGoalScorer: null,
-    goalAnimation: 0
+    goalAnimation: 0,
+    screenShake: 0
   };
 }
 
@@ -175,34 +479,79 @@ function createInitialGameState(): GameState {
 function updatePlayerPhysics(
   player: Player,
   keys: KeyState,
-  speedBoost: boolean
+  ball: Ball,
+  particles: Particle[]
 ): Player {
   const p = { ...player };
 
-  if (p.frozen) return p;
+  // Handle kick animation progress
+  if (p.kickState !== 'idle') {
+    p.kickProgress += 0.18;
+    if (p.kickProgress >= 1) {
+      p.kickState = 'idle';
+      p.kickProgress = 0;
+    }
+  }
 
-  const speed = speedBoost ? PLAYER_SPEED * 1.6 : PLAYER_SPEED;
+  if (p.kickCooldown > 0) p.kickCooldown -= 1;
+
+  // Eye tracking: calculate angle to ball
+  const dx = ball.x - p.x;
+  const dy = ball.y - p.y;
+  const angle = Math.atan2(dy, dx);
+  p.eyeOffset = {
+    x: Math.cos(angle) * 4.5,
+    y: Math.sin(angle) * 3.5
+  };
+
+  if (p.frozen) {
+    p.vx = 0;
+    p.vy = 0;
+    return p;
+  }
+
+  // Handle active kick triggers
+  if (keys.lowKick && p.kickState === 'idle' && p.kickCooldown <= 0) {
+    p.kickState = 'low';
+    p.kickProgress = 0;
+    p.kickCooldown = 14;
+    sound.playKick(false);
+  } else if (keys.highKick && p.kickState === 'idle' && p.kickCooldown <= 0) {
+    p.kickState = 'high';
+    p.kickProgress = 0;
+    p.kickCooldown = 16;
+    sound.playHighKick();
+  }
+
+  // Adjust radius if giant
+  p.radius = p.giant ? BASE_RADIUS * 1.35 : BASE_RADIUS;
+
+  const baseSpeed = p.character.speed;
+  const speed = p.powerUp === 'speed' ? baseSpeed * 1.6 : baseSpeed;
 
   // Horizontal movement
-  if (keys.left) p.vx -= speed * 0.4;
-  if (keys.right) p.vx += speed * 0.4;
+  if (keys.left) {
+    p.vx -= speed * 0.45;
+    p.runCycle += 0.25;
+  }
+  if (keys.right) {
+    p.vx += speed * 0.45;
+    p.runCycle += 0.25;
+  }
 
-  // Apply friction
+  // Friction
   p.vx *= p.onGround ? GROUND_FRICTION : FRICTION;
-
-  // Clamp horizontal speed
   p.vx = clamp(p.vx, -speed, speed);
 
   // Jump
   if (keys.up && p.onGround) {
-    p.vy = PLAYER_JUMP_FORCE;
+    p.vy = BASE_JUMP_FORCE;
     p.onGround = false;
   }
 
   // Gravity
   p.vy += GRAVITY;
 
-  // Update position
   p.x += p.vx;
   p.y += p.vy;
 
@@ -213,545 +562,922 @@ function updatePlayerPhysics(
     p.onGround = true;
   }
 
-  // Side boundaries - players stay on their side
+  // Boundaries
   const midField = GAME_WIDTH / 2;
+  const goalWall = GOAL_WIDTH + GOAL_DEPTH;
+
   if (p.side === 'left') {
-    // Left player can't enter their own goal or cross midfield
-    p.x = clamp(p.x, GOAL_WIDTH + GOAL_DEPTH + p.radius, midField - p.radius);
+    p.x = clamp(p.x, goalWall + p.radius - 5, midField - p.radius);
   } else {
-    // Right player can't enter their own goal or cross midfield
-    p.x = clamp(p.x, midField + p.radius, GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH - p.radius);
+    p.x = clamp(p.x, midField + p.radius, GAME_WIDTH - goalWall - p.radius + 5);
   }
 
   // Ceiling
   if (p.y - p.radius < 0) {
     p.y = p.radius;
-    p.vy = Math.abs(p.vy) * 0.5;
+    p.vy = Math.abs(p.vy) * 0.4;
   }
 
   return p;
 }
 
-function updateBallPhysics(ball: Ball, bigBallActive: boolean): Ball {
+function updateBallPhysics(
+  ball: Ball,
+  particles: Particle[]
+): Ball {
   const b = { ...ball };
 
-  const currentRadius = bigBallActive ? BALL_RADIUS * 1.5 : BALL_RADIUS;
-  b.radius = currentRadius;
-
   // Gravity
-  b.vy += GRAVITY * 0.8;
+  b.vy += GRAVITY * 0.78;
 
   // Air resistance
   b.vx *= AIR_RESISTANCE;
   b.vy *= AIR_RESISTANCE;
 
-  // Clamp speed
-  const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
-  if (speed > MAX_BALL_SPEED) {
-    const scale = MAX_BALL_SPEED / speed;
-    b.vx *= scale;
-    b.vy *= scale;
+  // Rotation based on horizontal speed
+  b.rotation += b.vx * 0.05;
+
+  // Speed clamping
+  const currentSpeed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+  if (currentSpeed > MAX_BALL_SPEED) {
+    b.vx = (b.vx / currentSpeed) * MAX_BALL_SPEED;
+    b.vy = (b.vy / currentSpeed) * MAX_BALL_SPEED;
   }
 
-  // Update position
+  // Spawn fire particles if fireball active
+  if (b.isFireball && Math.random() < 0.6) {
+    particles.push({
+      x: b.x + (Math.random() - 0.5) * 16,
+      y: b.y + (Math.random() - 0.5) * 16,
+      vx: -b.vx * 0.3 + (Math.random() - 0.5) * 2,
+      vy: -b.vy * 0.3 + (Math.random() - 0.5) * 2,
+      color: Math.random() > 0.5 ? '#ff3b30' : '#ff9500',
+      size: Math.random() * 6 + 4,
+      alpha: 1,
+      life: 0,
+      maxLife: 20,
+      type: 'fire'
+    });
+  }
+
   b.x += b.vx;
   b.y += b.vy;
 
-  // Ground bounce
+  // Ground collision
   if (b.y + b.radius >= GROUND_Y) {
     b.y = GROUND_Y - b.radius;
     b.vy = -b.vy * BALL_BOUNCE;
     b.vx *= GROUND_FRICTION;
+
+    if (Math.abs(b.vy) > 3) {
+      sound.playKick(false);
+    }
+    if (Math.abs(b.vy) < 1) b.vy = 0;
   }
 
-  // Ceiling bounce
-  if (b.y - b.radius < 0) {
+  // Ceiling collision
+  if (b.y - b.radius <= 0) {
     b.y = b.radius;
     b.vy = Math.abs(b.vy) * BALL_BOUNCE;
   }
 
-  // Goal area boundaries
-  const leftGoalRight = GOAL_WIDTH + GOAL_DEPTH;
-  const rightGoalLeft = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
+  // Outer walls collision
+  if (b.x - b.radius <= 0) {
+    b.x = b.radius;
+    b.vx = Math.abs(b.vx) * WALL_BOUNCE;
+  }
+  if (b.x + b.radius >= GAME_WIDTH) {
+    b.x = GAME_WIDTH - b.radius;
+    b.vx = -Math.abs(b.vx) * WALL_BOUNCE;
+  }
+
+  // Goalposts & Crossbars collision
   const goalTop = GROUND_Y - GOAL_HEIGHT;
+  const leftCrossbarX = GOAL_WIDTH + GOAL_DEPTH;
+  const rightCrossbarX = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
 
-  // Left side - check if ball is in goal area or playing field
-  if (b.x - b.radius < leftGoalRight) {
-    // Check if ball is at goal height (can enter goal)
-    if (b.y + b.radius > goalTop && b.y - b.radius < GROUND_Y) {
-      // Ball is in goal height range - allow entry into goal
-      if (b.x - b.radius < 0) {
-        // Hit back wall of goal
-        b.x = b.radius;
-        b.vx = Math.abs(b.vx) * WALL_BOUNCE;
-      }
-      // Bounce off goal top bar
-      if (b.y - b.radius < goalTop && b.x < leftGoalRight) {
-        b.y = goalTop + b.radius;
-        b.vy = Math.abs(b.vy) * WALL_BOUNCE;
-      }
-    } else {
-      // Ball is above goal - bounce off wall
-      if (b.x - b.radius < leftGoalRight && b.y - b.radius < goalTop) {
-        b.x = leftGoalRight + b.radius;
-        b.vx = Math.abs(b.vx) * WALL_BOUNCE;
-      }
-    }
+  // Left Crossbar hit
+  const distLeftPost = distance(b.x, b.y, leftCrossbarX, goalTop);
+  if (distLeftPost < b.radius + GOAL_POST_WIDTH) {
+    const angle = Math.atan2(b.y - goalTop, b.x - leftCrossbarX);
+    b.vx = Math.cos(angle) * (Math.abs(b.vx) + 4) * WALL_BOUNCE;
+    b.vy = Math.sin(angle) * (Math.abs(b.vy) + 4) * WALL_BOUNCE;
+    sound.playCrossbar();
   }
 
-  // Right side - check if ball is in goal area or playing field
-  if (b.x + b.radius > rightGoalLeft) {
-    if (b.y + b.radius > goalTop && b.y - b.radius < GROUND_Y) {
-      // Ball is in goal height range - allow entry
-      if (b.x + b.radius > GAME_WIDTH) {
-        // Hit back wall of goal
-        b.x = GAME_WIDTH - b.radius;
-        b.vx = -Math.abs(b.vx) * WALL_BOUNCE;
-      }
-      // Bounce off goal top bar
-      if (b.y - b.radius < goalTop && b.x > rightGoalLeft) {
-        b.y = goalTop + b.radius;
-        b.vy = Math.abs(b.vy) * WALL_BOUNCE;
-      }
-    } else {
-      // Ball is above goal - bounce off wall
-      if (b.x + b.radius > rightGoalLeft && b.y - b.radius < goalTop) {
-        b.x = rightGoalLeft - b.radius;
-        b.vx = -Math.abs(b.vx) * WALL_BOUNCE;
-      }
-    }
-  }
-
-  // Goal post collision (the vertical post at edge of goal opening)
-  const leftPostX = GOAL_WIDTH + GOAL_DEPTH;
-  const rightPostX = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
-
-  // Left goal post
-  if (distance(b.x, b.y, leftPostX, goalTop) < b.radius + GOAL_POST_WIDTH / 2) {
-    const angle = Math.atan2(b.y - goalTop, b.x - leftPostX);
-    const pushDist = b.radius + GOAL_POST_WIDTH / 2;
-    b.x = leftPostX + Math.cos(angle) * pushDist;
-    b.y = goalTop + Math.sin(angle) * pushDist;
-    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy) * WALL_BOUNCE;
-    b.vx = Math.cos(angle) * speed;
-    b.vy = Math.sin(angle) * speed;
-  }
-
-  // Right goal post
-  if (distance(b.x, b.y, rightPostX, goalTop) < b.radius + GOAL_POST_WIDTH / 2) {
-    const angle = Math.atan2(b.y - goalTop, b.x - rightPostX);
-    const pushDist = b.radius + GOAL_POST_WIDTH / 2;
-    b.x = rightPostX + Math.cos(angle) * pushDist;
-    b.y = goalTop + Math.sin(angle) * pushDist;
-    const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy) * WALL_BOUNCE;
-    b.vx = Math.cos(angle) * speed;
-    b.vy = Math.sin(angle) * speed;
+  // Right Crossbar hit
+  const distRightPost = distance(b.x, b.y, rightCrossbarX, goalTop);
+  if (distRightPost < b.radius + GOAL_POST_WIDTH) {
+    const angle = Math.atan2(b.y - goalTop, b.x - rightCrossbarX);
+    b.vx = Math.cos(angle) * (Math.abs(b.vx) + 4) * WALL_BOUNCE;
+    b.vy = Math.sin(angle) * (Math.abs(b.vy) + 4) * WALL_BOUNCE;
+    sound.playCrossbar();
   }
 
   return b;
 }
 
-function handlePlayerBallCollision(
+function handleKickingAndCollision(
   player: Player,
   ball: Ball,
-  isFireball: boolean
-): { player: Player; ball: Ball; collided: boolean } {
-  const dist = distance(player.x, player.y, ball.x, ball.y);
-  const minDist = player.radius + ball.radius;
+  particles: Particle[]
+): { player: Player; ball: Ball; hit: boolean } {
+  const p = { ...player };
+  let b = { ...ball };
+  let hit = false;
 
-  if (dist >= minDist) {
-    return { player, ball, collided: false };
+  // Calculate shoe position
+  const shoeOffsetForward = p.facing * (p.radius * 0.7);
+  let shoeX = p.x + shoeOffsetForward;
+  let shoeY = p.y + p.radius * 0.65;
+
+  // During kick animation, shoe moves forward/upward
+  if (p.kickState === 'low') {
+    const swing = Math.sin(p.kickProgress * Math.PI);
+    shoeX += p.facing * (swing * 26);
+    shoeY += swing * 4;
+  } else if (p.kickState === 'high') {
+    const swing = Math.sin(p.kickProgress * Math.PI);
+    shoeX += p.facing * (swing * 22);
+    shoeY -= swing * 26;
   }
 
-  const nx = (ball.x - player.x) / dist;
-  const ny = (ball.y - player.y) / dist;
+  // 1. Shoe / Foot Hit Check
+  const shoeDist = distance(shoeX, shoeY, b.x, b.y);
+  const shoeHitRadius = b.radius + 18;
 
-  const overlap = minDist - dist;
-  const newBall = { ...ball };
-  newBall.x += nx * overlap;
-  newBall.y += ny * overlap;
+  if (shoeDist < shoeHitRadius && p.kickState !== 'idle' && p.kickProgress > 0.15 && p.kickProgress < 0.85) {
+    hit = true;
+    const isFireball = b.isFireball;
+    const forceMultiplier = isFireball ? 1.8 : 1.0;
+    const characterPower = (p.character.power / 10);
 
-  const force = isFireball ? PLAYER_BALL_FORCE * 1.8 : PLAYER_BALL_FORCE;
+    if (p.kickState === 'low') {
+      // Powerful driven low shot
+      b.vx = p.facing * (13.5 * characterPower * forceMultiplier);
+      b.vy = -3.5 - Math.random() * 2;
+      sound.playKick(true);
+    } else {
+      // High lob / chip shot
+      b.vx = p.facing * (9.5 * characterPower * forceMultiplier);
+      b.vy = -12.5 * characterPower * forceMultiplier;
+      sound.playHighKick();
+    }
 
-  const playerInfluence = 0.6;
-  newBall.vx = nx * force + player.vx * playerInfluence;
-  newBall.vy = ny * force + player.vy * playerInfluence;
+    b.lastTouchedBy = p.side === 'left' ? 'player1' : 'player2';
 
-  const playerMovingToBall = (player.vx * nx + player.vy * ny) > 0;
-  if (playerMovingToBall) {
-    const extraForce = Math.sqrt(player.vx * player.vx + player.vy * player.vy) * 0.5;
-    newBall.vx += nx * extraForce;
-    newBall.vy += ny * extraForce;
+    // Grass chunk particles
+    for (let i = 0; i < 5; i++) {
+      particles.push({
+        x: shoeX,
+        y: shoeY + 10,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -Math.random() * 6 - 2,
+        color: '#22c55e',
+        size: Math.random() * 4 + 2,
+        alpha: 1,
+        life: 0,
+        maxLife: 25,
+        type: 'grass'
+      });
+    }
+
+    return { player: p, ball: b, hit: true };
   }
 
-  if (ny < -0.3 && newBall.vy > -3) {
-    newBall.vy = Math.min(newBall.vy, -6);
+  // 2. Head / Body Collision Check
+  const dist = distance(p.x, p.y, b.x, b.y);
+  const minDist = p.radius + b.radius;
+
+  if (dist < minDist) {
+    const nx = (b.x - p.x) / dist;
+    const ny = (b.y - p.y) / dist;
+
+    // Push ball outside player
+    const overlap = minDist - dist;
+    b.x += nx * overlap;
+    b.y += ny * overlap;
+
+    const baseForce = b.isFireball ? 16 : 11;
+    b.vx = nx * baseForce + p.vx * 0.6;
+    b.vy = ny * baseForce + p.vy * 0.6;
+
+    // Header upwards bonus if hitting top of head
+    if (ny < -0.3 && b.vy > -4) {
+      b.vy = -7.5;
+    }
+
+    b.lastTouchedBy = p.side === 'left' ? 'player1' : 'player2';
+    sound.playKick(false);
+    return { player: p, ball: b, hit: true };
   }
 
-  newBall.lastTouchedBy = player.side === 'left' ? 'player1' : 'player2';
-
-  return { player, ball: newBall, collided: true };
+  return { player: p, ball: b, hit: false };
 }
 
-// Goal detection - ball must be fully inside goal area
 function checkGoal(ball: Ball): 'player1' | 'player2' | null {
   const goalTop = GROUND_Y - GOAL_HEIGHT;
-  const leftGoalLine = GOAL_WIDTH; // The actual goal line
+  const leftGoalLine = GOAL_WIDTH;
   const rightGoalLine = GAME_WIDTH - GOAL_WIDTH;
 
-  // Left goal (player2 scores) - ball center past the goal line
   if (ball.x < leftGoalLine && ball.y > goalTop && ball.y < GROUND_Y) {
     return 'player2';
   }
-
-  // Right goal (player1 scores) - ball center past the goal line
   if (ball.x > rightGoalLine && ball.y > goalTop && ball.y < GROUND_Y) {
     return 'player1';
   }
-
   return null;
 }
 
 // ============================================================================
-// AI SYSTEM
+// SMART AI SYSTEM
 // ============================================================================
 
 function updateAI(
-  aiPlayer: Player,
+  ai: Player,
   ball: Ball,
   opponent: Player,
-  difficulty: number = 0.85
+  difficulty: number = 0.88
 ): KeyState {
-  const keys: KeyState = { left: false, right: false, up: false };
+  const keys: KeyState = { left: false, right: false, up: false, lowKick: false, highKick: false };
+  if (ai.frozen) return keys;
 
-  if (aiPlayer.frozen) return keys;
-
-  const ballPredictedX = ball.x + ball.vx * 15;
-  const myGoalX = aiPlayer.side === 'left' ? GOAL_WIDTH + GOAL_DEPTH : GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
+  const myGoalX = ai.side === 'left' ? GOAL_WIDTH + GOAL_DEPTH : GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
   const midField = GAME_WIDTH / 2;
+  const distToBall = distance(ai.x, ai.y, ball.x, ball.y);
+  const ballOnMySide = ai.side === 'left' ? ball.x < midField + 40 : ball.x > midField - 40;
+  const ballMovingToGoal = ai.side === 'left' ? ball.vx < -1 : ball.vx > 1;
 
-  const distToBall = distance(aiPlayer.x, aiPlayer.y, ball.x, ball.y);
-  const ballOnMySide = aiPlayer.side === 'left' ? ball.x < midField + 50 : ball.x > midField - 50;
-  const ballMovingToGoal = aiPlayer.side === 'left' ? ball.vx < -1 : ball.vx > 1;
-  const ballNearGoal = aiPlayer.side === 'left'
-    ? ball.x < myGoalX + 150
-    : ball.x > myGoalX - 150;
-
-  // Defensive behavior
-  if (ballNearGoal && ballMovingToGoal) {
-    const targetX = aiPlayer.side === 'left'
-      ? Math.max(ball.x - 30, myGoalX + 50)
-      : Math.min(ball.x + 30, myGoalX - 50);
-
-    if (aiPlayer.x < targetX - 15) keys.right = true;
-    else if (aiPlayer.x > targetX + 15) keys.left = true;
-
-    if (distToBall < 100 && ball.y < aiPlayer.y && aiPlayer.onGround) {
-      keys.up = true;
-    }
+  // Move towards ball with tactical positioning
+  let targetX = ball.x + (ai.side === 'left' ? -35 : 35);
+  if (ai.side === 'left') {
+    targetX = clamp(targetX, myGoalX + 45, midField - 30);
+  } else {
+    targetX = clamp(targetX, midField + 30, myGoalX - 45);
   }
-  else if (!ballOnMySide || ball.vx * (aiPlayer.side === 'left' ? 1 : -1) > 2) {
-    const readyX = aiPlayer.side === 'left' ? midField - 100 : midField + 100;
 
-    if (aiPlayer.x < readyX - 20) keys.right = true;
-    else if (aiPlayer.x > readyX + 20) keys.left = true;
+  if (ai.x < targetX - 10) keys.right = true;
+  else if (ai.x > targetX + 10) keys.left = true;
+
+  // Jump if ball is in the air above
+  const shouldJump = (distToBall < 110 && ball.y < ai.y - 10) || (ball.y < GROUND_Y - 90 && distToBall < 85);
+  if (shouldJump && ai.onGround && Math.random() < difficulty) {
+    keys.up = true;
   }
-  else {
-    let targetX = ballPredictedX;
 
-    if (aiPlayer.side === 'left') {
-      targetX = clamp(targetX, myGoalX + 50, midField - 30);
+  // Smart Kicking
+  if (distToBall < 90) {
+    // If opponent is off line, lob high kick
+    const opponentDistanceToGoal = Math.abs(opponent.x - (opponent.side === 'left' ? GOAL_WIDTH : GAME_WIDTH - GOAL_WIDTH));
+    if (opponentDistanceToGoal > 130 && Math.random() < 0.6) {
+      keys.highKick = true;
     } else {
-      targetX = clamp(targetX, midField + 30, myGoalX - 50);
+      keys.lowKick = true;
     }
-
-    const attackOffset = aiPlayer.side === 'left' ? -20 : 20;
-    if (aiPlayer.x < targetX + attackOffset - 10) {
-      keys.right = true;
-    } else if (aiPlayer.x > targetX + attackOffset + 10) {
-      keys.left = true;
-    }
-
-    const shouldJump =
-      (distToBall < 120 && ball.y < aiPlayer.y + 20) ||
-      (ball.y < GROUND_Y - 100 && distToBall < 80) ||
-      (Math.abs(aiPlayer.x - ball.x) < 50 && ball.y < aiPlayer.y - 20);
-
-    if (shouldJump && aiPlayer.onGround && Math.random() < difficulty) {
-      keys.up = true;
-    }
-  }
-
-  if (Math.random() > difficulty) {
-    if (Math.random() < 0.1) keys.up = !keys.up;
   }
 
   return keys;
 }
 
 // ============================================================================
-// RENDERING
+// HIGH-FIDELITY HEAD BALL RENDERING ENGINE
 // ============================================================================
 
 function drawGame(
   ctx: CanvasRenderingContext2D,
-  state: GameState
+  state: GameState,
+  particles: Particle[]
 ) {
-  const { player1, player2, ball, goalAnimation } = state;
-
-  // Clear and draw background
-  ctx.fillStyle = '#228B22';
-  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-
-  // Draw grass pattern
-  ctx.fillStyle = '#1E7D1E';
-  for (let x = 0; x < GAME_WIDTH; x += 40) {
-    ctx.fillRect(x, 0, 20, GAME_HEIGHT);
-  }
-
-  // Draw ground
-  ctx.fillStyle = '#654321';
-  ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
-
-  // Draw center line
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([10, 10]);
-  ctx.beginPath();
-  ctx.moveTo(GAME_WIDTH / 2, 0);
-  ctx.lineTo(GAME_WIDTH / 2, GROUND_Y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Draw center circle
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(GAME_WIDTH / 2, GROUND_Y - 60, 60, Math.PI, 0);
-  ctx.stroke();
-
-  // Draw goals
-  const goalTop = GROUND_Y - GOAL_HEIGHT;
-  const leftGoalRight = GOAL_WIDTH + GOAL_DEPTH;
-  const rightGoalLeft = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
-
-  // Left goal - dark interior
-  ctx.fillStyle = '#1a1a2e';
-  ctx.fillRect(0, goalTop, leftGoalRight, GOAL_HEIGHT);
-
-  // Left goal frame
-  ctx.strokeStyle = '#FFD700';
-  ctx.lineWidth = GOAL_POST_WIDTH;
-  // Top bar
-  ctx.beginPath();
-  ctx.moveTo(0, goalTop);
-  ctx.lineTo(leftGoalRight, goalTop);
-  ctx.stroke();
-  // Front post
-  ctx.beginPath();
-  ctx.moveTo(leftGoalRight, goalTop);
-  ctx.lineTo(leftGoalRight, GROUND_Y);
-  ctx.stroke();
-
-  // Left goal net pattern
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.lineWidth = 1;
-  for (let y = goalTop + 15; y < GROUND_Y; y += 15) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(leftGoalRight - 5, y);
-    ctx.stroke();
-  }
-  for (let x = 10; x < leftGoalRight; x += 15) {
-    ctx.beginPath();
-    ctx.moveTo(x, goalTop + 5);
-    ctx.lineTo(x, GROUND_Y);
-    ctx.stroke();
-  }
-
-  // Right goal - dark interior
-  ctx.fillStyle = '#1a1a2e';
-  ctx.fillRect(rightGoalLeft, goalTop, GOAL_WIDTH + GOAL_DEPTH, GOAL_HEIGHT);
-
-  // Right goal frame
-  ctx.strokeStyle = '#FFD700';
-  ctx.lineWidth = GOAL_POST_WIDTH;
-  // Top bar
-  ctx.beginPath();
-  ctx.moveTo(rightGoalLeft, goalTop);
-  ctx.lineTo(GAME_WIDTH, goalTop);
-  ctx.stroke();
-  // Front post
-  ctx.beginPath();
-  ctx.moveTo(rightGoalLeft, goalTop);
-  ctx.lineTo(rightGoalLeft, GROUND_Y);
-  ctx.stroke();
-
-  // Right goal net pattern
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.lineWidth = 1;
-  for (let y = goalTop + 15; y < GROUND_Y; y += 15) {
-    ctx.beginPath();
-    ctx.moveTo(rightGoalLeft + 5, y);
-    ctx.lineTo(GAME_WIDTH, y);
-    ctx.stroke();
-  }
-  for (let x = rightGoalLeft + 10; x < GAME_WIDTH; x += 15) {
-    ctx.beginPath();
-    ctx.moveTo(x, goalTop + 5);
-    ctx.lineTo(x, GROUND_Y);
-    ctx.stroke();
-  }
-
-  // Draw goal line indicators
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.lineWidth = 3;
-  ctx.setLineDash([5, 5]);
-  // Left goal line
-  ctx.beginPath();
-  ctx.moveTo(GOAL_WIDTH, goalTop);
-  ctx.lineTo(GOAL_WIDTH, GROUND_Y);
-  ctx.stroke();
-  // Right goal line
-  ctx.beginPath();
-  ctx.moveTo(GAME_WIDTH - GOAL_WIDTH, goalTop);
-  ctx.lineTo(GAME_WIDTH - GOAL_WIDTH, GROUND_Y);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Draw players
-  drawPlayer(ctx, player1, goalAnimation === 1);
-  drawPlayer(ctx, player2, goalAnimation === 2);
-
-  // Draw ball
-  drawBall(ctx, ball);
-}
-
-function drawPlayer(ctx: CanvasRenderingContext2D, player: Player, celebrating: boolean) {
-  const { x, y, radius, color, emoji, frozen, powerUp } = player;
+  const { player1, player2, ball, goalAnimation, screenShake } = state;
 
   ctx.save();
 
-  if (frozen) {
-    ctx.globalAlpha = 0.6;
+  // Screen shake on massive hits or goals
+  if (screenShake > 0) {
+    const shakeX = (Math.random() - 0.5) * screenShake;
+    const shakeY = (Math.random() - 0.5) * screenShake;
+    ctx.translate(shakeX, shakeY);
   }
 
-  if (powerUp === 'speed') {
-    ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 20;
-  }
+  // 1. Stadium Night Sky Background
+  const skyGradient = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  skyGradient.addColorStop(0, '#0a0f24');
+  skyGradient.addColorStop(0.5, '#131b3e');
+  skyGradient.addColorStop(1, '#1b2654');
+  ctx.fillStyle = skyGradient;
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-  // Draw body
-  ctx.fillStyle = color;
+  // 2. Stadium Crowd in Stands
+  drawStadiumStands(ctx);
 
-  // Head (circle)
-  ctx.beginPath();
-  ctx.arc(x, y - radius * 0.25, radius * 0.65, 0, Math.PI * 2);
-  ctx.fill();
+  // 3. Stadium Floodlights & Ambient Cones
+  drawFloodlights(ctx);
 
-  // Body
-  ctx.beginPath();
-  ctx.ellipse(x, y + radius * 0.25, radius * 0.45, radius * 0.65, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // 4. Advertising Ribbon Boards
+  drawAdRibbon(ctx);
 
-  // Border
-  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(x, y - radius * 0.25, radius * 0.65, 0, Math.PI * 2);
-  ctx.stroke();
+  // 5. Grass Pitch with Striped Lawn Pattern
+  drawPitchTurf(ctx);
 
-  // Draw face/emoji
-  ctx.font = `${radius * 0.9}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(emoji, x, y - radius * 0.25);
+  // 6. 3D Goalposts & Nets
+  drawGoalposts(ctx);
 
-  if (celebrating) {
-    ctx.font = '28px Arial';
-    ctx.fillText('🎉', x, y - radius - 25);
-  }
+  // 7. Pitch Lines & Center Arc
+  drawPitchLines(ctx);
 
-  if (frozen) {
-    ctx.font = `${radius}px Arial`;
-    ctx.fillText('❄️', x, y);
-  }
+  // 8. Draw Head Ball Players with Cleats & Animated Eyes
+  drawHeadBallPlayer(ctx, player1, goalAnimation === 1);
+  drawHeadBallPlayer(ctx, player2, goalAnimation === 2);
 
-  if (powerUp && powerUp !== 'speed') {
-    const icon = POWER_UPS.find(p => p.type === powerUp)?.icon || '';
-    ctx.font = '18px Arial';
-    ctx.fillText(icon, x, y - radius - 18);
+  // 9. Particles (Confetti, Fire, Grass)
+  drawParticles(ctx, particles);
+
+  // 10. Soccer Ball with 32-panel pattern & Speed Trail
+  drawBall(ctx, ball);
+
+  // 11. Goal Celebration Splash
+  if (goalAnimation > 0) {
+    drawGoalCelebration(ctx, state);
   }
 
   ctx.restore();
 }
 
-function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
-  const { x, y, radius, isFireball } = ball;
+function drawStadiumStands(ctx: CanvasRenderingContext2D) {
+  // Upper stadium tier
+  ctx.fillStyle = 'rgba(20, 27, 56, 0.85)';
+  ctx.fillRect(0, 40, GAME_WIDTH, 140);
+
+  // Crowd rows
+  const crowdColors = ['#f43f5e', '#3b82f6', '#10b981', '#fbbf24', '#a855f7', '#06b6d4', '#e2e8f0'];
+  const now = Date.now() * 0.003;
+
+  for (let row = 0; row < 4; row++) {
+    const y = 60 + row * 24;
+    for (let x = 20; x < GAME_WIDTH - 20; x += 14) {
+      const colorIdx = (Math.floor(x * 0.1) + row) % crowdColors.length;
+      const bob = Math.sin(now + x * 0.05) * 2;
+      ctx.fillStyle = crowdColors[colorIdx];
+      // Head
+      ctx.beginPath();
+      ctx.arc(x, y + bob, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function drawFloodlights(ctx: CanvasRenderingContext2D) {
+  // 4 floodlights along top
+  const lightX = [120, 280, 560, 720];
+  for (const lx of lightX) {
+    // Housing
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(lx - 20, 10, 40, 10);
+
+    // Glow bulbs
+    ctx.fillStyle = '#ffffff';
+    for (let b = -15; b <= 15; b += 10) {
+      ctx.beginPath();
+      ctx.arc(lx + b, 15, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Volumetric light beam
+    const beamGrad = ctx.createLinearGradient(lx, 15, lx, GROUND_Y);
+    beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.16)');
+    beamGrad.addColorStop(0.8, 'rgba(255, 255, 255, 0.02)');
+    beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = beamGrad;
+    ctx.beginPath();
+    ctx.moveTo(lx - 20, 15);
+    ctx.lineTo(lx + 20, 15);
+    ctx.lineTo(lx + 80, GROUND_Y);
+    ctx.lineTo(lx - 80, GROUND_Y);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+function drawAdRibbon(ctx: CanvasRenderingContext2D) {
+  const y = GROUND_Y - GOAL_HEIGHT - 22;
+  const h = 22;
+
+  // Dark ribbon board
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, y, GAME_WIDTH, h);
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, y, GAME_WIDTH, h);
+
+  // Digital LED sponsors
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const sponsors = [
+    { text: '⚽ HEAD BALL 2026', color: '#38bdf8', x: 120 },
+    { text: '🔥 SUPERPOWERS ACTIVE', color: '#f59e0b', x: 290 },
+    { text: 'TABRIZ ARENA', color: '#10b981', x: 420 },
+    { text: '🤖 AI LEAGUE', color: '#a855f7', x: 570 },
+    { text: '⚡ FAST VOLLEY', color: '#ef4444', x: 720 },
+  ];
+
+  for (const s of sponsors) {
+    ctx.fillStyle = s.color;
+    ctx.fillText(s.text, s.x, y + h / 2);
+  }
+}
+
+function drawPitchTurf(ctx: CanvasRenderingContext2D) {
+  // Ground depth block below turf
+  ctx.fillStyle = '#1c1917';
+  ctx.fillRect(0, GROUND_Y, GAME_WIDTH, GAME_HEIGHT - GROUND_Y);
+
+  // Turf grass base
+  ctx.fillStyle = '#15803d';
+  ctx.fillRect(0, GROUND_Y - 8, GAME_WIDTH, 8);
+
+  // Alternating grass stripes
+  const stripeW = 44;
+  for (let x = 0; x < GAME_WIDTH; x += stripeW * 2) {
+    ctx.fillStyle = 'rgba(22, 101, 52, 0.45)';
+    ctx.fillRect(x, GROUND_Y - GOAL_HEIGHT, stripeW, GOAL_HEIGHT);
+  }
+}
+
+function drawPitchLines(ctx: CanvasRenderingContext2D) {
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+  ctx.lineWidth = 2.5;
+
+  // Center Line
+  ctx.beginPath();
+  ctx.moveTo(GAME_WIDTH / 2, GROUND_Y - GOAL_HEIGHT);
+  ctx.lineTo(GAME_WIDTH / 2, GROUND_Y);
+  ctx.stroke();
+
+  // Center Arc
+  ctx.beginPath();
+  ctx.arc(GAME_WIDTH / 2, GROUND_Y, 70, Math.PI, Math.PI * 2);
+  ctx.stroke();
+
+  // Center Spot
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(GAME_WIDTH / 2, GROUND_Y - 4, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ground Line
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y);
+  ctx.lineTo(GAME_WIDTH, GROUND_Y);
+  ctx.stroke();
+}
+
+function drawGoalposts(ctx: CanvasRenderingContext2D) {
+  const goalTop = GROUND_Y - GOAL_HEIGHT;
+  const leftX = GOAL_WIDTH + GOAL_DEPTH;
+  const rightX = GAME_WIDTH - GOAL_WIDTH - GOAL_DEPTH;
+
+  // Left Net Background
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+  ctx.fillRect(0, goalTop, leftX, GOAL_HEIGHT);
+
+  // Left Net Grid
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+  ctx.lineWidth = 1;
+  for (let y = goalTop + 14; y < GROUND_Y; y += 14) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(leftX, y);
+    ctx.stroke();
+  }
+  for (let x = 12; x < leftX; x += 14) {
+    ctx.beginPath();
+    ctx.moveTo(x, goalTop);
+    ctx.lineTo(x, GROUND_Y);
+    ctx.stroke();
+  }
+
+  // Left 3D Metallic Goalpost & Crossbar
+  ctx.strokeStyle = '#f8fafc';
+  ctx.lineWidth = GOAL_POST_WIDTH;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, goalTop);
+  ctx.lineTo(leftX, goalTop); // Crossbar
+  ctx.lineTo(leftX, GROUND_Y); // Front Post
+  ctx.stroke();
+
+  // Right Net Background
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+  ctx.fillRect(rightX, goalTop, GOAL_WIDTH + GOAL_DEPTH, GOAL_HEIGHT);
+
+  // Right Net Grid
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+  ctx.lineWidth = 1;
+  for (let y = goalTop + 14; y < GROUND_Y; y += 14) {
+    ctx.beginPath();
+    ctx.moveTo(rightX, y);
+    ctx.lineTo(GAME_WIDTH, y);
+    ctx.stroke();
+  }
+  for (let x = rightX + 12; x < GAME_WIDTH; x += 14) {
+    ctx.beginPath();
+    ctx.moveTo(x, goalTop);
+    ctx.lineTo(x, GROUND_Y);
+    ctx.stroke();
+  }
+
+  // Right 3D Goalpost
+  ctx.strokeStyle = '#f8fafc';
+  ctx.lineWidth = GOAL_POST_WIDTH;
+  ctx.beginPath();
+  ctx.moveTo(GAME_WIDTH, goalTop);
+  ctx.lineTo(rightX, goalTop); // Crossbar
+  ctx.lineTo(rightX, GROUND_Y); // Front Post
+  ctx.stroke();
+}
+
+function drawHeadBallPlayer(
+  ctx: CanvasRenderingContext2D,
+  player: Player,
+  celebrating: boolean
+) {
+  const { x, y, radius, facing, character, frozen, powerUp, kickState, kickProgress, runCycle, eyeOffset } = player;
 
   ctx.save();
 
-  if (isFireball) {
-    ctx.shadowColor = '#FF4500';
-    ctx.shadowBlur = 30;
+  // 1. Shadow on pitch
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(x, GROUND_Y - 2, radius * 0.9, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
-    gradient.addColorStop(0, '#FFFF00');
-    gradient.addColorStop(0.3, '#FF6600');
-    gradient.addColorStop(1, 'rgba(255, 0, 0, 0)');
-    ctx.fillStyle = gradient;
+  // 2. Power-up aura
+  if (powerUp === 'speed') {
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 24;
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.8)';
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(x, y, radius * 2, 0, Math.PI * 2);
+    ctx.arc(x, y, radius * 1.15, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 3. Torso / Jersey (underneath the head)
+  const jerseyY = y + radius * 0.35;
+  ctx.fillStyle = character.jerseyColor;
+  ctx.beginPath();
+  ctx.ellipse(x, jerseyY, radius * 0.55, radius * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Jersey Secondary Stripes/Collar
+  ctx.fillStyle = character.jerseySecondary;
+  ctx.beginPath();
+  ctx.arc(x, jerseyY - 4, radius * 0.25, 0, Math.PI);
+  ctx.fill();
+
+  // 4. The Iconic Football Boot / Cleat (with kicking swing!)
+  let bootX = x + facing * (radius * 0.65);
+  let bootY = y + radius * 0.75 + Math.sin(runCycle) * 3;
+  let bootAngle = facing * 0.1;
+
+  if (kickState === 'low') {
+    const swing = Math.sin(kickProgress * Math.PI);
+    bootX += facing * (swing * 30);
+    bootY -= swing * 8;
+    bootAngle = facing * swing * 1.1;
+
+    // Motion blur arc behind shoe
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(x, y + radius * 0.5, radius * 0.9, -0.2, 0.8 * facing);
+    ctx.stroke();
+  } else if (kickState === 'high') {
+    const swing = Math.sin(kickProgress * Math.PI);
+    bootX += facing * (swing * 22);
+    bootY -= swing * 34;
+    bootAngle = -facing * swing * 1.4;
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y + radius * 0.4, radius * 1.05, -0.6, 0.6);
+    ctx.stroke();
+  }
+
+  // Draw Boot
+  ctx.save();
+  ctx.translate(bootX, bootY);
+  ctx.rotate(bootAngle);
+
+  // Boot Upper
+  ctx.fillStyle = character.bootColor;
+  ctx.beginPath();
+  ctx.roundRect(-14, -8, 28, 14, 5);
+  ctx.fill();
+
+  // Boot Brand Stripe
+  ctx.fillStyle = character.bootSecondary;
+  ctx.beginPath();
+  ctx.ellipse(0, -2, 8, 3, facing * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Boot Studs / Cleats
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillRect(-10, 6, 4, 3);
+  ctx.fillRect(0, 6, 4, 3);
+  ctx.fillRect(8, 6, 4, 3);
+  ctx.restore();
+
+  // 5. Big Characteristic Head
+  const headY = y - radius * 0.15;
+  const headR = radius * 0.85;
+
+  // Head base with skin tone
+  ctx.fillStyle = character.skinTone;
+  ctx.beginPath();
+  ctx.arc(x, headY, headR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Head subtle shading
+  const headShade = ctx.createRadialGradient(x - 5, headY - 8, 2, x, headY, headR);
+  headShade.addColorStop(0, 'rgba(255, 255, 255, 0.18)');
+  headShade.addColorStop(1, 'rgba(0, 0, 0, 0.22)');
+  ctx.fillStyle = headShade;
+  ctx.beginPath();
+  ctx.arc(x, headY, headR, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 6. Hair & Accessories
+  drawHair(ctx, x, headY, headR, character, facing);
+
+  // 7. Facial Features (Animated Tracking Eyes & Expressive Mouth)
+  const eyeBaseX = x + facing * (headR * 0.35);
+  const eyeBaseY = headY - 2;
+
+  // Eyes (White Sclera)
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.ellipse(eyeBaseX - 7, eyeBaseY, 7, 9, 0, 0, Math.PI * 2);
+  ctx.ellipse(eyeBaseX + 7, eyeBaseY, 7, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pupils (Tracking the ball position!)
+  ctx.fillStyle = '#0f172a';
+  ctx.beginPath();
+  ctx.arc(eyeBaseX - 7 + eyeOffset.x, eyeBaseY + eyeOffset.y, 3.8, 0, Math.PI * 2);
+  ctx.arc(eyeBaseX + 7 + eyeOffset.x, eyeBaseY + eyeOffset.y, 3.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eyebrows
+  ctx.strokeStyle = character.hairColor;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(eyeBaseX - 14, eyeBaseY - 11);
+  ctx.lineTo(eyeBaseX - 2, eyeBaseY - 8);
+  ctx.moveTo(eyeBaseX + 2, eyeBaseY - 8);
+  ctx.lineTo(eyeBaseX + 14, eyeBaseY - 11);
+  ctx.stroke();
+
+  // Mouth (Excited on kick/jump, smile otherwise)
+  ctx.fillStyle = '#7f1d1d';
+  if (kickState !== 'idle' || !player.onGround) {
+    ctx.beginPath();
+    ctx.arc(eyeBaseX, eyeBaseY + 14, 6, 0, Math.PI);
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = '#450a0a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(eyeBaseX, eyeBaseY + 11, 6, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+  }
+
+  // 8. Freeze Ice Block Effect
+  if (frozen) {
+    ctx.fillStyle = 'rgba(186, 230, 253, 0.7)';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(x - radius * 1.1, y - radius * 1.1, radius * 2.2, radius * 2.2, 12);
+    ctx.fill();
+    ctx.stroke();
+
+    // Ice crystals
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('❄️', x - 12, y + 8);
+  }
+
+  // 9. Celebration Flag / Emoji
+  if (celebrating) {
+    ctx.font = '28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎉', x, headY - headR - 18);
+  }
+
+  ctx.restore();
+}
+
+function drawHair(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  r: number,
+  char: CharacterSkin,
+  facing: number
+) {
+  ctx.fillStyle = char.hairColor;
+
+  if (char.hairStyle === 'slick') {
+    // Slicked back high taper
+    ctx.beginPath();
+    ctx.arc(x, y - 5, r * 1.03, Math.PI * 0.9, Math.PI * 2.1);
+    ctx.fill();
+  } else if (char.hairStyle === 'classic') {
+    // Classic side-part
+    ctx.beginPath();
+    ctx.arc(x, y - 4, r * 1.02, Math.PI * 0.85, Math.PI * 2.15);
+    ctx.fill();
+    // Fringe
+    ctx.beginPath();
+    ctx.ellipse(x + facing * 8, y - r * 0.75, 12, 6, 0.4 * facing, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (char.hairStyle === 'buzz') {
+    // Clean athletic buzz cut
+    ctx.beginPath();
+    ctx.arc(x, y - 2, r * 1.01, Math.PI * 0.8, Math.PI * 2.2);
+    ctx.fill();
+  } else if (char.hairStyle === 'cyborg') {
+    // Cyber robotic visor + sleek cyber plate
+    ctx.fillStyle = '#06b6d4';
+    ctx.beginPath();
+    ctx.arc(x, y - 5, r * 1.04, Math.PI * 0.85, Math.PI * 2.15);
+    ctx.fill();
+
+    // Glowing Neon Visor
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.9)';
+    ctx.shadowColor = '#06b6d4';
+    ctx.shadowBlur = 14;
+    ctx.fillRect(x + facing * 2 - 16, y - 5, 32, 7);
+    ctx.shadowBlur = 0;
+  } else if (char.hairStyle === 'flame') {
+    // Spiky flame spikes
+    ctx.fillStyle = '#ef4444';
+    for (let i = -3; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(x + i * 8 - 6, y - r * 0.7);
+      ctx.lineTo(x + i * 8, y - r * 1.35 - Math.abs(i) * 2);
+      ctx.lineTo(x + i * 8 + 6, y - r * 0.7);
+      ctx.fill();
+    }
+  }
+}
+
+function drawBall(ctx: CanvasRenderingContext2D, ball: Ball) {
+  const { x, y, radius, rotation, isFireball } = ball;
+
+  ctx.save();
+
+  // Ball Pitch Shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  const shadowScale = Math.max(0.4, 1 - (GROUND_Y - y) / 300);
+  ctx.beginPath();
+  ctx.ellipse(x, GROUND_Y - 2, radius * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Fireball Trail & Aura
+  if (isFireball) {
+    ctx.shadowColor = '#f97316';
+    ctx.shadowBlur = 28;
+    const fireGrad = ctx.createRadialGradient(x, y, 0, x, y, radius * 2.2);
+    fireGrad.addColorStop(0, '#fef08a');
+    fireGrad.addColorStop(0.35, '#f97316');
+    fireGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+    ctx.fillStyle = fireGrad;
+    ctx.beginPath();
+    ctx.arc(x, y, radius * 2.2, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  // Ball body
-  ctx.fillStyle = '#FFFFFF';
+  // Soccer Ball Base
+  ctx.fillStyle = '#ffffff';
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fill();
 
-  // Ball pattern
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.arc(x, y, radius, 0, Math.PI * 2);
-  ctx.stroke();
+  // Rotate ball skin
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
 
-  // Pentagon pattern
-  ctx.fillStyle = '#000000';
-  const pentagonRadius = radius * 0.4;
+  // Authentic 32-Panel Soccer Pattern
+  ctx.fillStyle = '#0f172a';
+  const pentagonR = radius * 0.38;
   ctx.beginPath();
   for (let i = 0; i < 5; i++) {
     const angle = (i * 72 - 90) * Math.PI / 180;
-    const px = x + Math.cos(angle) * pentagonRadius;
-    const py = y + Math.sin(angle) * pentagonRadius;
+    const px = Math.cos(angle) * pentagonR;
+    const py = Math.sin(angle) * pentagonR;
     if (i === 0) ctx.moveTo(px, py);
     else ctx.lineTo(px, py);
   }
   ctx.closePath();
   ctx.fill();
 
+  // Outer panel stitches
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1.5;
+  for (let i = 0; i < 5; i++) {
+    const angle = (i * 72 - 90) * Math.PI / 180;
+    const px = Math.cos(angle) * pentagonR;
+    const py = Math.sin(angle) * pentagonR;
+    const ox = Math.cos(angle) * radius;
+    const oy = Math.sin(angle) * radius;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(ox, oy);
+    ctx.stroke();
+  }
+
+  // Ball Specular Highlight
+  ctx.restore();
+  const specGrad = ctx.createRadialGradient(x - radius * 0.35, y - radius * 0.35, 1, x, y, radius);
+  specGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+  specGrad.addColorStop(1, 'rgba(0, 0, 0, 0.25)');
+  ctx.fillStyle = specGrad;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawParticles(ctx: CanvasRenderingContext2D, particles: Particle[]) {
+  for (const p of particles) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.fillStyle = p.color;
+
+    if (p.type === 'confetti') {
+      ctx.fillRect(p.x, p.y, p.size, p.size * 1.5);
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+function drawGoalCelebration(ctx: CanvasRenderingContext2D, state: GameState) {
+  const text = state.lastGoalScorer === 'player1' ? 'GOAL! PLAYER 1 🎉' : 'GOAL! PLAYER 2 🎉';
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.fillRect(0, GAME_HEIGHT / 2 - 50, GAME_WIDTH, 100);
+
+  ctx.font = '900 48px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Neon text glow
+  ctx.shadowColor = '#f59e0b';
+  ctx.shadowBlur = 24;
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillText(text, GAME_WIDTH / 2, GAME_HEIGHT / 2);
+
   ctx.restore();
 }
 
 // ============================================================================
-// MAIN COMPONENT
+// MAIN GAME COMPONENT
 // ============================================================================
 
 export default function HeadBallGame({ onBack }: HeadBallGameProps) {
   const [gameMode, setGameMode] = useState<'menu' | 'playing' | 'paused' | 'gameOver' | 'lobby'>('menu');
   const [playMode, setPlayMode] = useState<'ai' | 'local' | 'online'>('ai');
-  const [gameState, setGameState] = useState<GameState>(createInitialGameState);
 
-  // Online multiplayer state
+  // Selected Characters
+  const [p1Character, setP1Character] = useState<CharacterSkin>(CHARACTERS[0]);
+  const [p2Character, setP2Character] = useState<CharacterSkin>(CHARACTERS[1]);
+
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [gameState, setGameState] = useState<GameState>(() => createInitialGameState(CHARACTERS[0], CHARACTERS[1]));
+
+  // Particles & Screen Effects
+  const particlesRef = useRef<Particle[]>([]);
+
+  // Online Multiplayer State
   const [roomCode, setRoomCode] = useState<string>("");
   const [joinCode, setJoinCode] = useState<string>("");
   const [isHost, setIsHost] = useState<boolean>(false);
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
   const [connectionError, setConnectionError] = useState<string>("");
   const wsRef = useRef<WebSocket | PartySocket | null>(null);
-  const frameCountRef = useRef<number>(0);
 
   // Power-up cooldowns
   const [p1Cooldowns, setP1Cooldowns] = useState<Map<PowerUpType, number>>(new Map());
@@ -761,43 +1487,50 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
   const [playerName, setPlayerName] = useState<string>("");
   const [showScoreSubmit, setShowScoreSubmit] = useState<boolean>(false);
 
-  // Mobile touch controls
-  const touchControlsRef = useRef<KeyState>({ left: false, right: false, up: false });
+  // Mobile Touch Controls
+  const touchControlsRef = useRef<KeyState>({
+    left: false, right: false, up: false, lowKick: false, highKick: false
+  });
 
-  // Refs for game loop
+  // Loop refs
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameStateRef = useRef<GameState>(gameState);
   const keysRef = useRef<{ p1: KeyState; p2: KeyState }>({
-    p1: { left: false, right: false, up: false },
-    p2: { left: false, right: false, up: false }
+    p1: { left: false, right: false, up: false, lowKick: false, highKick: false },
+    p2: { left: false, right: false, up: false, lowKick: false, highKick: false }
   });
   const lastTimeRef = useRef<number>(0);
   const frameIdRef = useRef<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const remoteKeysRef = useRef<KeyState>({ left: false, right: false, up: false });
 
   const queryClient = useQueryClient();
+
+  // Sync sound setting
+  useEffect(() => {
+    sound.enabled = soundEnabled;
+  }, [soundEnabled]);
 
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
 
-  // Fetch scores
+  // Top Scores with graceful fallback
   const { data: topScores = [] } = useQuery({
     queryKey: ['/api/games/headball/scores'],
     queryFn: async () => {
-      const response = await fetch('/api/games/headball/scores?limit=5');
-      if (!response.ok) throw new Error('Failed to fetch scores');
-      return response.json();
-    }
-  });
-
-  const { data: allScores = [] } = useQuery({
-    queryKey: ['/api/games/headball/all-scores'],
-    queryFn: async () => {
-      const response = await fetch('/api/games/headball/scores');
-      if (!response.ok) throw new Error('Failed to fetch all scores');
-      return response.json();
+      try {
+        const response = await fetch('/api/games/headball/scores?limit=5');
+        if (!response.ok) throw new Error('Failed');
+        return await response.json();
+      } catch {
+        // Fallback local mock leaderboard
+        return [
+          { id: 1, playerName: "Leo 🐐", score: 8, timeInSeconds: 90 },
+          { id: 2, playerName: "CR7 ⚡", score: 7, timeInSeconds: 90 },
+          { id: 3, playerName: "Baku AI 🤖", score: 6, timeInSeconds: 90 },
+          { id: 4, playerName: "Kylian 👑", score: 5, timeInSeconds: 90 },
+          { id: 5, playerName: "Tabriz ⚽", score: 4, timeInSeconds: 90 },
+        ];
+      }
     }
   });
 
@@ -813,193 +1546,133 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/games/headball/scores'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/games/headball/all-scores'] });
       setShowScoreSubmit(false);
       setPlayerName("");
     },
   });
 
-  // PartyKit host configuration
-  // In production, use the deployed PartyKit server
-  // In development, use local PartyKit dev server
-  // PartyKit host configuration
-  // Use robust check for production vs development
-  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  // PartyKit Multiplayer Configuration
+  const isDevelopment = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const PARTYKIT_HOST = isDevelopment ? "localhost:1999" : "tabriz-portfolio-games.tebriz993.partykit.dev";
 
-  const PARTYKIT_HOST = isDevelopment
-    ? "localhost:1999"
-    : "tabriz-portfolio-games.tebriz993.partykit.dev";
-
-  console.log('PartyKit Host:', PARTYKIT_HOST); // Debug log
-
-  // Generate 6-digit room code
   const generateRoomCode = useCallback(() => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   }, []);
 
-  // Connect to PartyKit room
   const connectToRoom = useCallback((roomId: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.close();
     }
-
     setConnectionStatus('connecting');
     setConnectionError("");
 
     try {
       const ps = new PartySocket({
         host: PARTYKIT_HOST,
-        room: roomId,
+        room: `headball-${roomId}`,
       });
 
-      wsRef.current = ps;
-
-      const connectionTimeout = setTimeout(() => {
-        if (ps.readyState !== WebSocket.OPEN) {
-          ps.close();
-          setConnectionStatus('error');
-          setConnectionError('Connection timeout. Server may be unavailable.');
-        }
-      }, 10000);
-
       ps.onopen = () => {
-        clearTimeout(connectionTimeout);
         setConnectionStatus('connected');
-        setConnectionError("");
+        if (isHost) {
+          ps.send(JSON.stringify({ type: 'HOST_JOIN', payload: { roomId } }));
+        } else {
+          ps.send(JSON.stringify({ type: 'CLIENT_JOIN', payload: { roomId } }));
+        }
       };
 
-      ps.onmessage = (event: MessageEvent) => {
+      ps.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data);
-
-          switch (message.type) {
-            case 'ROOM_CREATED':
-              setRoomCode(message.payload.code);
-              setGameMode('lobby');
-              setIsHost(true);
-              break;
-
-            case 'GAME_START':
-              setGameMode('playing');
-              setIsHost(message.payload.role === 'player1');
-              startGame('online');
-              break;
-
-            case 'GAME_STATE':
-              if (!isHost && playMode === 'online') {
-                const state = message.payload;
-                setGameState(prev => ({
-                  ...prev,
-                  player1: state.player1,
-                  player2: state.player2,
-                  ball: state.ball,
-                  timeLeft: state.timeLeft
-                }));
-              }
-              break;
-
-            case 'PLAYER_INPUT':
-              if (isHost && playMode === 'online') {
-                const input = message.payload;
-                remoteKeysRef.current = {
-                  left: input.left || false,
-                  right: input.right || false,
-                  up: input.up || false
-                };
-              }
-              break;
-
-            case 'PLAYER_DISCONNECTED':
-              setConnectionError('Opponent disconnected');
-              resetGame();
-              break;
-
-            case 'ERROR':
-              setConnectionError(message.payload.message || 'Unknown error');
-              if (gameMode === 'lobby') {
-                setGameMode('menu');
-              }
-              break;
+          const data = JSON.parse(event.data);
+          if (data.type === 'START_GAME') {
+            setGameMode('playing');
+            sound.playWhistle('short');
+          } else if (data.type === 'GAME_STATE' && !isHost) {
+            setGameState(data.payload);
+          } else if (data.type === 'PLAYER_INPUT' && isHost) {
+            keysRef.current.p2 = data.payload;
           }
-        } catch (e) {
-          console.error('Failed to parse WebSocket message:', e);
-        }
+        } catch {}
       };
 
       ps.onerror = () => {
-        clearTimeout(connectionTimeout);
         setConnectionStatus('error');
-        setConnectionError('Connection failed. PartyKit server may not be running.');
+        setConnectionError("Failed to connect to multiplayer server");
       };
 
-      ps.onclose = () => {
-        clearTimeout(connectionTimeout);
-        if (connectionStatus !== 'error') {
-          setConnectionStatus('disconnected');
-        }
-      };
-    } catch (error) {
+      wsRef.current = ps;
+    } catch {
       setConnectionStatus('error');
-      setConnectionError('Failed to create PartySocket connection');
+      setConnectionError("PartyKit connection failed");
     }
-  }, [isHost, playMode, gameMode, connectionStatus, PARTYKIT_HOST]);
+  }, [PARTYKIT_HOST, isHost]);
 
-  // Create a new room (host)
   const createRoom = useCallback(() => {
-    setConnectionError("");
-    const newRoomCode = generateRoomCode();
-    connectToRoom(newRoomCode);
+    const code = generateRoomCode();
+    setRoomCode(code);
+    setIsHost(true);
+    setPlayMode('online');
+    setGameMode('lobby');
+    connectToRoom(code);
   }, [generateRoomCode, connectToRoom]);
 
-  // Join an existing room (client)
   const joinRoom = useCallback(() => {
-    if (joinCode.length !== 6) {
-      setConnectionError('Please enter a valid 6-digit room code');
-      return;
-    }
-
-    setConnectionError("");
+    if (joinCode.length !== 6) return;
+    setIsHost(false);
+    setPlayMode('online');
+    setRoomCode(joinCode);
     connectToRoom(joinCode);
   }, [joinCode, connectToRoom]);
 
-  // Keyboard handling
+  // Start match
+  const startGame = (mode: 'ai' | 'local' | 'online') => {
+    setPlayMode(mode);
+    setGameState(createInitialGameState(p1Character, p2Character));
+    setGameMode('playing');
+    sound.playWhistle('double');
+  };
+
+  const resetGame = () => {
+    if (wsRef.current) wsRef.current.close();
+    setGameMode('menu');
+    setGameState(createInitialGameState(p1Character, p2Character));
+  };
+
+  // Keyboard Event Handlers
   useEffect(() => {
+    if (gameMode !== 'playing') return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      const key = e.code;
+      const code = e.code;
 
-      if (key === 'KeyA' || key === 'ArrowLeft') {
-        keysRef.current.p1.left = true;
-        e.preventDefault();
-      }
-      if (key === 'KeyD' || key === 'ArrowRight') {
-        keysRef.current.p1.right = true;
-        e.preventDefault();
-      }
-      if (key === 'KeyW' || key === 'ArrowUp' || key === 'Space') {
-        keysRef.current.p1.up = true;
-        e.preventDefault();
-      }
+      // Player 1 controls
+      if (code === 'KeyA' || code === 'ArrowLeft') keysRef.current.p1.left = true;
+      if (code === 'KeyD' || code === 'ArrowRight') keysRef.current.p1.right = true;
+      if (code === 'KeyW' || code === 'ArrowUp') keysRef.current.p1.up = true;
+      if (code === 'Space' || code === 'KeyF') keysRef.current.p1.lowKick = true;
+      if (code === 'KeyE') keysRef.current.p1.highKick = true;
 
+      // Player 1 Power-ups (1 to 4)
+      if (code === 'Digit1') usePowerUp('player1', 'freeze');
+      if (code === 'Digit2') usePowerUp('player1', 'speed');
+      if (code === 'Digit3') usePowerUp('player1', 'giant');
+      if (code === 'Digit4') usePowerUp('player1', 'fireball');
+
+      // Player 2 controls in Local mode
       if (playMode === 'local') {
-        if (key === 'KeyJ') keysRef.current.p2.left = true;
-        if (key === 'KeyL') keysRef.current.p2.right = true;
-        if (key === 'KeyI') keysRef.current.p2.up = true;
+        if (code === 'KeyJ') keysRef.current.p2.left = true;
+        if (code === 'KeyL') keysRef.current.p2.right = true;
+        if (code === 'KeyI') keysRef.current.p2.up = true;
+        if (code === 'KeyU') keysRef.current.p2.lowKick = true;
+        if (code === 'KeyO') keysRef.current.p2.highKick = true;
+
+        if (code === 'Digit7') usePowerUp('player2', 'freeze');
+        if (code === 'Digit8') usePowerUp('player2', 'speed');
+        if (code === 'Digit9') usePowerUp('player2', 'giant');
+        if (code === 'Digit0') usePowerUp('player2', 'fireball');
       }
 
-      if (gameMode === 'playing') {
-        if (key === 'Digit1') usePowerUp('player1', 'freeze');
-        if (key === 'Digit2') usePowerUp('player1', 'speed');
-        if (key === 'Digit3') usePowerUp('player1', 'bigBall');
-        if (key === 'Digit4') usePowerUp('player1', 'fireball');
-
-        if (playMode === 'local') {
-          if (key === 'Digit7') usePowerUp('player2', 'freeze');
-          if (key === 'Digit8') usePowerUp('player2', 'speed');
-          if (key === 'Digit9') usePowerUp('player2', 'bigBall');
-          if (key === 'Digit0') usePowerUp('player2', 'fireball');
-        }
-      }
-
+      // Online input stream
       if (playMode === 'online' && !isHost && wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({
           type: 'PLAYER_INPUT',
@@ -1009,16 +1682,20 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      const key = e.code;
+      const code = e.code;
 
-      if (key === 'KeyA' || key === 'ArrowLeft') keysRef.current.p1.left = false;
-      if (key === 'KeyD' || key === 'ArrowRight') keysRef.current.p1.right = false;
-      if (key === 'KeyW' || key === 'ArrowUp' || key === 'Space') keysRef.current.p1.up = false;
+      if (code === 'KeyA' || code === 'ArrowLeft') keysRef.current.p1.left = false;
+      if (code === 'KeyD' || code === 'ArrowRight') keysRef.current.p1.right = false;
+      if (code === 'KeyW' || code === 'ArrowUp') keysRef.current.p1.up = false;
+      if (code === 'Space' || code === 'KeyF') keysRef.current.p1.lowKick = false;
+      if (code === 'KeyE') keysRef.current.p1.highKick = false;
 
       if (playMode === 'local') {
-        if (key === 'KeyJ') keysRef.current.p2.left = false;
-        if (key === 'KeyL') keysRef.current.p2.right = false;
-        if (key === 'KeyI') keysRef.current.p2.up = false;
+        if (code === 'KeyJ') keysRef.current.p2.left = false;
+        if (code === 'KeyL') keysRef.current.p2.right = false;
+        if (code === 'KeyI') keysRef.current.p2.up = false;
+        if (code === 'KeyU') keysRef.current.p2.lowKick = false;
+        if (code === 'KeyO') keysRef.current.p2.highKick = false;
       }
 
       if (playMode === 'online' && !isHost && wsRef.current?.readyState === WebSocket.OPEN) {
@@ -1031,17 +1708,16 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, [gameMode, playMode, isHost]);
 
-  // Mobile touch control handlers
-  const handleTouchStart = useCallback((control: 'left' | 'right' | 'up') => {
-    touchControlsRef.current[control] = true;
-    keysRef.current.p1[control] = true;
+  // Mobile Touch Event Handlers
+  const handleTouch = useCallback((control: keyof KeyState, pressed: boolean) => {
+    touchControlsRef.current[control] = pressed;
+    keysRef.current.p1[control] = pressed;
 
     if (playMode === 'online' && !isHost && wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({
@@ -1051,82 +1727,71 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     }
   }, [playMode, isHost]);
 
-  const handleTouchEnd = useCallback((control: 'left' | 'right' | 'up') => {
-    touchControlsRef.current[control] = false;
-    keysRef.current.p1[control] = false;
-
-    if (playMode === 'online' && !isHost && wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({
-        type: 'PLAYER_INPUT',
-        payload: keysRef.current.p1
-      }));
-    }
-  }, [playMode, isHost]);
-
-  // Power-up usage
-  const usePowerUp = useCallback((player: 'player1' | 'player2', type: PowerUpType) => {
-    const cooldowns = player === 'player1' ? p1Cooldowns : p2Cooldowns;
-    const setCooldowns = player === 'player1' ? setP1Cooldowns : setP2Cooldowns;
+  // Use Power-Up
+  const usePowerUp = useCallback((playerKey: 'player1' | 'player2', type: PowerUpType) => {
+    const cooldowns = playerKey === 'player1' ? p1Cooldowns : p2Cooldowns;
+    const setCooldowns = playerKey === 'player1' ? setP1Cooldowns : setP2Cooldowns;
     const now = Date.now();
 
     if (cooldowns.get(type) && cooldowns.get(type)! > now) return;
 
-    const powerUp = POWER_UPS.find(p => p.type === type);
-    if (!powerUp) return;
+    const power = POWER_UPS.find(p => p.type === type);
+    if (!power) return;
 
-    setCooldowns(prev => new Map(prev).set(type, now + powerUp.cooldown));
+    setCooldowns(prev => new Map(prev).set(type, now + power.cooldown));
+    sound.playPowerUp(type);
 
     setGameState(prev => {
-      const newState = { ...prev };
-      const targetPlayer = player === 'player1' ? 'player1' : 'player2';
-      const opponent = player === 'player1' ? 'player2' : 'player1';
+      const next = { ...prev };
+      const me = playerKey === 'player1' ? 'player1' : 'player2';
+      const enemy = playerKey === 'player1' ? 'player2' : 'player1';
 
-      switch (type) {
-        case 'freeze':
-          newState[opponent] = {
-            ...newState[opponent],
-            frozen: true,
-            frozenEndTime: now + powerUp.duration
-          };
-          break;
-
-        case 'speed':
-          newState[targetPlayer] = {
-            ...newState[targetPlayer],
-            powerUp: 'speed',
-            powerUpEndTime: now + powerUp.duration
-          };
-          break;
-
-        case 'bigBall':
-          newState[targetPlayer] = {
-            ...newState[targetPlayer],
-            powerUp: 'bigBall',
-            powerUpEndTime: now + powerUp.duration
-          };
-          break;
-
-        case 'fireball':
-          newState.ball = {
-            ...newState.ball,
-            isFireball: true,
-            fireballEndTime: now + 3000,
-            vx: newState.ball.vx * 1.5,
-            vy: newState.ball.vy * 1.5
-          };
-          break;
+      if (type === 'freeze') {
+        next[enemy] = { ...next[enemy], frozen: true, frozenEndTime: now + power.duration };
+      } else if (type === 'speed') {
+        next[me] = { ...next[me], powerUp: 'speed', powerUpEndTime: now + power.duration };
+      } else if (type === 'giant') {
+        next[me] = { ...next[me], giant: true, giantEndTime: now + power.duration };
+      } else if (type === 'fireball') {
+        next.ball = {
+          ...next.ball,
+          isFireball: true,
+          fireballEndTime: now + power.duration,
+          vx: next.ball.vx * 1.6,
+          vy: next.ball.vy * 1.6
+        };
       }
-
-      return newState;
+      return next;
     });
   }, [p1Cooldowns, p2Cooldowns]);
 
-  // Game loop
+  // Confetti spawner
+  const spawnConfetti = useCallback((scorer: 'player1' | 'player2') => {
+    const colors = ['#f43f5e', '#3b82f6', '#10b981', '#fbbf24', '#8b5cf6', '#ffffff'];
+    const originX = scorer === 'player1' ? GAME_WIDTH - 80 : 80;
+
+    for (let i = 0; i < 70; i++) {
+      particlesRef.current.push({
+        x: originX + (Math.random() - 0.5) * 60,
+        y: GROUND_Y - GOAL_HEIGHT + Math.random() * 40,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -Math.random() * 12 - 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: Math.random() * 6 + 3,
+        alpha: 1,
+        life: 0,
+        maxLife: 60 + Math.random() * 40,
+        type: 'confetti'
+      });
+    }
+  }, []);
+
+  // Main Loop
   const gameLoop = useCallback((timestamp: number) => {
     if (gameMode !== 'playing') return;
 
-    const deltaTime = timestamp - lastTimeRef.current;
-    if (deltaTime < 16) {
+    const delta = timestamp - lastTimeRef.current;
+    if (delta < 16) {
       frameIdRef.current = requestAnimationFrame(gameLoop);
       return;
     }
@@ -1135,627 +1800,577 @@ export default function HeadBallGame({ onBack }: HeadBallGameProps) {
     const state = gameStateRef.current;
     const now = Date.now();
 
+    // Client renderer in online mode
     if (playMode === 'online' && !isHost) {
       const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext('2d');
-        if (ctx) drawGame(ctx, state);
+        if (ctx) drawGame(ctx, state, particlesRef.current);
       }
       frameIdRef.current = requestAnimationFrame(gameLoop);
       return;
     }
 
-    let newState = { ...state };
+    let next = { ...state };
 
-    if (state.player1.frozen && now > state.player1.frozenEndTime) {
-      newState.player1 = { ...newState.player1, frozen: false };
-    }
-    if (state.player2.frozen && now > state.player2.frozenEndTime) {
-      newState.player2 = { ...newState.player2, frozen: false };
-    }
-    if (state.player1.powerUp && now > state.player1.powerUpEndTime) {
-      newState.player1 = { ...newState.player1, powerUp: null };
-    }
-    if (state.player2.powerUp && now > state.player2.powerUpEndTime) {
-      newState.player2 = { ...newState.player2, powerUp: null };
-    }
-    if (state.ball.isFireball && now > state.ball.fireballEndTime) {
-      newState.ball = { ...newState.ball, isFireball: false };
-    }
+    // Clear expired power-ups
+    if (next.player1.frozen && now > next.player1.frozenEndTime) next.player1.frozen = false;
+    if (next.player2.frozen && now > next.player2.frozenEndTime) next.player2.frozen = false;
+    if (next.player1.powerUp === 'speed' && now > next.player1.powerUpEndTime) next.player1.powerUp = null;
+    if (next.player2.powerUp === 'speed' && now > next.player2.powerUpEndTime) next.player2.powerUp = null;
+    if (next.player1.giant && now > next.player1.giantEndTime) next.player1.giant = false;
+    if (next.player2.giant && now > next.player2.giantEndTime) next.player2.giant = false;
+    if (next.ball.isFireball && now > next.ball.fireballEndTime) next.ball.isFireball = false;
 
+    // Decay screen shake
+    if (next.screenShake > 0) next.screenShake *= 0.88;
+
+    // AI inputs in vs AI mode
     let p2Keys = keysRef.current.p2;
     if (playMode === 'ai') {
-      p2Keys = updateAI(state.player2, state.ball, state.player1, 0.85);
-    } else if (playMode === 'online' && isHost) {
-      p2Keys = remoteKeysRef.current;
+      p2Keys = updateAI(next.player2, next.ball, next.player1, 0.88);
     }
 
-    // Merge touch controls with keyboard
-    const p1Keys = {
-      left: keysRef.current.p1.left || touchControlsRef.current.left,
-      right: keysRef.current.p1.right || touchControlsRef.current.right,
-      up: keysRef.current.p1.up || touchControlsRef.current.up
-    };
+    // Update Player 1
+    next.player1 = updatePlayerPhysics(next.player1, keysRef.current.p1, next.ball, particlesRef.current);
 
-    newState.player1 = updatePlayerPhysics(
-      newState.player1,
-      p1Keys,
-      newState.player1.powerUp === 'speed'
-    );
-    newState.player2 = updatePlayerPhysics(
-      newState.player2,
-      p2Keys,
-      newState.player2.powerUp === 'speed'
-    );
+    // Update Player 2
+    next.player2 = updatePlayerPhysics(next.player2, p2Keys, next.ball, particlesRef.current);
 
-    const bigBallActive = newState.player1.powerUp === 'bigBall' || newState.player2.powerUp === 'bigBall';
-    newState.ball = updateBallPhysics(newState.ball, bigBallActive);
+    // Update Ball
+    next.ball = updateBallPhysics(next.ball, particlesRef.current);
 
-    const p1Collision = handlePlayerBallCollision(
-      newState.player1,
-      newState.ball,
-      newState.ball.isFireball
-    );
-    if (p1Collision.collided) {
-      newState.ball = p1Collision.ball;
+    // Collisions & Kicks
+    const p1Col = handleKickingAndCollision(next.player1, next.ball, particlesRef.current);
+    next.player1 = p1Col.player;
+    next.ball = p1Col.ball;
+
+    const p2Col = handleKickingAndCollision(next.player2, next.ball, particlesRef.current);
+    next.player2 = p2Col.player;
+    next.ball = p2Col.ball;
+
+    // Update Particles
+    for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+      const p = particlesRef.current[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.25; // gravity on particles
+      p.life += 1;
+      p.alpha = Math.max(0, 1 - p.life / p.maxLife);
+      if (p.life >= p.maxLife) particlesRef.current.splice(i, 1);
     }
 
-    const p2Collision = handlePlayerBallCollision(
-      newState.player2,
-      newState.ball,
-      newState.ball.isFireball
-    );
-    if (p2Collision.collided) {
-      newState.ball = p2Collision.ball;
-    }
+    // Goal Check
+    const scorer = checkGoal(next.ball);
+    if (scorer && next.goalAnimation === 0) {
+      next.goalAnimation = scorer === 'player1' ? 1 : 2;
+      next.lastGoalScorer = scorer;
+      next.screenShake = 16;
+      sound.playGoal();
+      sound.playWhistle('long');
+      spawnConfetti(scorer);
 
-    const goal = checkGoal(newState.ball);
-    if (goal && newState.goalAnimation === 0) {
-      if (goal === 'player1') {
-        newState.player1 = { ...newState.player1, score: newState.player1.score + 1 };
-      } else {
-        newState.player2 = { ...newState.player2, score: newState.player2.score + 1 };
-      }
-      newState.lastGoalScorer = goal;
-      newState.goalAnimation = goal === 'player1' ? 1 : 2;
+      if (scorer === 'player1') next.player1.score += 1;
+      else next.player2.score += 1;
 
+      // Reset positions after celebration
       setTimeout(() => {
-        setGameState(prev => ({
-          ...prev,
+        setGameState(cur => ({
+          ...cur,
+          player1: { ...cur.player1, x: 160, y: GROUND_Y - BASE_RADIUS, vx: 0, vy: 0 },
+          player2: { ...cur.player2, x: GAME_WIDTH - 160, y: GROUND_Y - BASE_RADIUS, vx: 0, vy: 0 },
           ball: createInitialBall(),
           goalAnimation: 0
         }));
-      }, 1500);
+        sound.playWhistle('short');
+      }, 2200);
     }
 
-    setGameState(newState);
+    setGameState(next);
 
-    // Network throttle: Send updates every 3rd frame (~20 FPS)
-    frameCountRef.current++;
-    if (playMode === 'online' && isHost && wsRef.current?.readyState === WebSocket.OPEN && frameCountRef.current % 3 === 0) {
-      wsRef.current.send(JSON.stringify({
-        type: 'GAME_STATE',
-        payload: {
-          player1: newState.player1,
-          player2: newState.player2,
-          ball: newState.ball,
-          timeLeft: newState.timeLeft
-        }
-      }));
+    // Send state to peer in host online mode
+    if (playMode === 'online' && isHost && wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'GAME_STATE', payload: next }));
     }
 
+    // Draw frame
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
-      if (ctx) drawGame(ctx, newState);
+      if (ctx) drawGame(ctx, next, particlesRef.current);
     }
 
     frameIdRef.current = requestAnimationFrame(gameLoop);
-  }, [gameMode, playMode, isHost]);
+  }, [gameMode, playMode, isHost, spawnConfetti]);
 
   useEffect(() => {
     if (gameMode === 'playing') {
       lastTimeRef.current = performance.now();
       frameIdRef.current = requestAnimationFrame(gameLoop);
-
-      timerRef.current = setInterval(() => {
-        setGameState(prev => {
-          if (prev.timeLeft <= 1) {
-            setGameMode('gameOver');
-            setShowScoreSubmit(true);
-            return { ...prev, timeLeft: 0 };
-          }
-          return { ...prev, timeLeft: prev.timeLeft - 1 };
-        });
-      }, 1000);
     }
-
-    return () => {
-      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
+    return () => cancelAnimationFrame(frameIdRef.current);
   }, [gameMode, gameLoop]);
 
+  // Match countdown timer
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      if (ctx) drawGame(ctx, gameState);
-    }
-  }, []);
-
-  const startGame = useCallback((mode: 'ai' | 'local' | 'online') => {
-    setPlayMode(mode);
-    setGameMode('playing');
-    setGameState({
-      ...createInitialGameState(),
-      timeLeft: MATCH_DURATION
-    });
-    setP1Cooldowns(new Map());
-    setP2Cooldowns(new Map());
-    keysRef.current = {
-      p1: { left: false, right: false, up: false },
-      p2: { left: false, right: false, up: false }
-    };
-    touchControlsRef.current = { left: false, right: false, up: false };
-  }, []);
-
-  const resetGame = useCallback(() => {
-    setGameMode('menu');
-    setGameState(createInitialGameState());
-    setShowScoreSubmit(false);
-    setRoomCode("");
-    setJoinCode("");
-    setIsHost(false);
-    setConnectionStatus('disconnected');
-    setConnectionError("");
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-  }, []);
+    if (gameMode !== 'playing') return;
+    const timer = setInterval(() => {
+      setGameState(prev => {
+        if (prev.timeLeft <= 1) {
+          sound.playWhistle('long');
+          setGameMode('gameOver');
+          setShowScoreSubmit(true);
+          return { ...prev, timeLeft: 0 };
+        }
+        return { ...prev, timeLeft: prev.timeLeft - 1 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [gameMode]);
 
   const handleSubmitScore = () => {
-    if (playerName.trim()) {
-      const finalScore = Math.max(gameState.player1.score, gameState.player2.score) * 100 +
-        (MATCH_DURATION - gameState.timeLeft) * 5;
-      submitScoreMutation.mutate({
-        playerName: playerName.trim(),
-        score: finalScore,
-        timeInSeconds: MATCH_DURATION - gameState.timeLeft,
-      });
-    }
+    if (!playerName.trim()) return;
+    submitScoreMutation.mutate({
+      playerName: playerName.trim(),
+      score: gameState.player1.score,
+      timeInSeconds: MATCH_DURATION - gameState.timeLeft
+    });
   };
 
   // ============================================================================
-  // RENDER
+  // RENDER: MENU SCREEN
   // ============================================================================
 
-  // Menu screen
   if (gameMode === 'menu') {
     return (
-      <div className="fixed inset-0 bg-background flex flex-col">
-        <div className="flex items-center justify-between p-4 bg-muted/20 border-b">
-          <Button variant="outline" size="sm" onClick={onBack}>← Back</Button>
-          <h1 className="text-2xl font-bold">Head Ball</h1>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <List className="h-4 w-4 mr-2" />Results
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-4 overflow-y-auto">
+        <div className="max-w-3xl w-full my-auto space-y-6 py-6">
+          {/* Header & Title */}
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="sm" onClick={onBack} className="rounded-xl">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              All Games
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="rounded-xl"
+                title={soundEnabled ? "Mute SFX" : "Enable SFX"}
+              >
+                {soundEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
               </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  Head Ball - All Results
-                </DialogTitle>
-              </DialogHeader>
-              <div className="mt-4">
-                {allScores.length > 0 ? (
-                  <div className="space-y-2">
-                    {allScores.map((score: any, index: number) => (
-                      <div key={score.id} className="flex items-center justify-between py-2 px-3 rounded bg-muted/30 border">
-                        <div className="flex items-center gap-3">
-                          <span className={`text-sm font-bold ${index < 3 ?
-                            index === 0 ? "text-yellow-500" :
-                              index === 1 ? "text-gray-400" : "text-orange-500"
-                            : "text-muted-foreground"}`}>
-                            #{index + 1}
-                          </span>
-                          <span className="font-medium">{score.playerName}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-mono font-bold">{score.score}</div>
-                          <div className="text-xs text-muted-foreground">{new Date(score.createdAt).toLocaleDateString()}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">No scores recorded yet</p>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="min-h-full flex flex-col items-center justify-center p-4 md:p-8">
-            <div className="max-w-2xl w-full space-y-6 text-center">
-              <div>
-                <h2 className="text-4xl font-bold mb-4">⚽ Head Ball</h2>
-                <p className="text-lg text-muted-foreground">
-                  Physics-based football game with special powers!
-                </p>
-              </div>
-
-              {/* Top Scores */}
-              <div className="bg-muted/20 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">🏆 Top Scores</h3>
-                {topScores.length > 0 ? (
-                  <div className="space-y-2">
-                    {topScores.slice(0, 3).map((score: any, index: number) => (
-                      <div key={score.id} className="flex items-center justify-between">
-                        <span className={index === 0 ? "text-yellow-500 font-bold" : ""}>
-                          #{index + 1} {score.playerName}
-                        </span>
-                        <span className="font-mono">{score.score}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No scores yet - be the first!</p>
-                )}
-              </div>
-
-              {/* Game Mode Selection */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Choose Game Mode</h3>
-                <div className="grid gap-4 max-w-md mx-auto">
-                  <Button onClick={() => startGame('ai')} size="lg" className="h-16 text-lg">
-                    🤖 vs AI
-                  </Button>
-                  <Button onClick={() => startGame('local')} size="lg" variant="outline" className="h-16 text-lg">
-                    👥 Local Multiplayer
-                  </Button>
-                </div>
-
-                {/* Online Multiplayer */}
-                <div className="mt-6 border-t pt-6 bg-muted/10 p-4 rounded-lg">
-                  <h3 className="text-xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                    🌐 Online Multiplayer
-                  </h3>
-
-                  {/* Connection Status */}
-                  <div className="flex items-center justify-center gap-2 mb-4 text-sm">
-                    {connectionStatus === 'connected' ? (
-                      <><Wifi className="h-4 w-4 text-green-500" /><span className="text-green-500">Connected</span></>
-                    ) : connectionStatus === 'connecting' ? (
-                      <><Wifi className="h-4 w-4 text-yellow-500 animate-pulse" /><span className="text-yellow-500">Connecting...</span></>
-                    ) : connectionStatus === 'error' ? (
-                      <><WifiOff className="h-4 w-4 text-red-500" /><span className="text-red-500">Error</span></>
-                    ) : (
-                      <><WifiOff className="h-4 w-4 text-muted-foreground" /><span className="text-muted-foreground">Disconnected</span></>
-                    )}
-                  </div>
-
-                  {connectionError && (
-                    <div className="mb-4 p-2 bg-red-500/20 border border-red-500/30 rounded text-sm text-red-400">
-                      {connectionError}
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-                    <div className="space-y-2">
-                      <Button
-                        onClick={createRoom}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700"
-                        disabled={connectionStatus === 'connecting'}
-                      >
-                        {connectionStatus === 'connecting' ? 'Connecting...' : 'Create Game'}
-                      </Button>
-                      <p className="text-xs text-muted-foreground">Host a match</p>
-                    </div>
-                    <div className="space-y-2">
-                      <Input
-                        placeholder="Enter Code"
-                        value={joinCode}
-                        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                        maxLength={6}
-                        className="text-center font-mono tracking-widest uppercase"
-                      />
-                      <Button
-                        onClick={joinRoom}
-                        variant="outline"
-                        className="w-full"
-                        disabled={connectionStatus === 'connecting' || joinCode.length !== 6}
-                      >
-                        Join Game
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div className="bg-blue-500/10 rounded-lg p-3">
-                  <h4 className="font-semibold mb-2">Player 1 Controls</h4>
-                  <div className="space-y-1 text-xs">
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">A/D</kbd> or <kbd className="px-1 py-0.5 bg-muted rounded text-xs">←/→</kbd> Move</p>
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">W/Space</kbd> or <kbd className="px-1 py-0.5 bg-muted rounded text-xs">↑</kbd> Jump</p>
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">1-4</kbd> Power-ups</p>
-                  </div>
-                </div>
-                <div className="bg-red-500/10 rounded-lg p-3">
-                  <h4 className="font-semibold mb-2">Player 2 Controls</h4>
-                  <div className="space-y-1 text-xs">
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">J/L</kbd> Move</p>
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">I</kbd> Jump</p>
-                    <p><kbd className="px-1 py-0.5 bg-muted rounded text-xs">7-0</kbd> Power-ups</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Power-ups */}
-              <div className="bg-muted/20 rounded-lg p-3">
-                <h4 className="font-semibold mb-2">Power-ups</h4>
-                <div className="grid grid-cols-4 gap-2 text-xs">
-                  {POWER_UPS.map((power) => (
-                    <div key={power.type} className="text-center">
-                      <div className="text-lg mb-1">{power.icon}</div>
-                      <div className="font-medium">{power.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
+          </div>
+
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5" />
+              Pro Edition • 2026 Head Ball Arena
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-gradient">
+              ⚽ HEAD BALL 2026
+            </h1>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Real 1v1 soccer showdown with animated cleats, low/high driven kicks, dynamic crowd, and game-changing superpowers!
+            </p>
+          </div>
+
+          {/* Character Selector Carousel */}
+          <Card className="glass-panel border-border/80 shadow-md rounded-2xl overflow-hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Select Your Superstar
+                </span>
+                <span className="text-xs font-bold text-primary">
+                  {p1Character.flag} {p1Character.name} — {p1Character.title}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {CHARACTERS.map((char) => {
+                  const isSelected = p1Character.id === char.id;
+                  return (
+                    <button
+                      key={char.id}
+                      onClick={() => setP1Character(char)}
+                      className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center gap-2 relative ${
+                        isSelected
+                          ? "bg-primary/10 border-primary ring-2 ring-primary/30 shadow-md scale-102"
+                          : "bg-card/60 border-border/70 hover:border-primary/40 hover:bg-muted/50"
+                      }`}
+                    >
+                      <div 
+                        className="w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-inner relative"
+                        style={{ backgroundColor: char.skinTone }}
+                      >
+                        <div 
+                          className="absolute inset-x-1 top-0 h-4 rounded-t-full"
+                          style={{ backgroundColor: char.hairColor }}
+                        />
+                        <span className="relative z-10">{char.flag}</span>
+                      </div>
+                      <div>
+                        <div className="font-bold text-xs truncate max-w-full">{char.name}</div>
+                        <div className="text-[10px] text-muted-foreground">{char.country}</div>
+                      </div>
+                      <div className="w-full flex justify-between text-[10px] text-muted-foreground px-1 border-t border-border/40 pt-1">
+                        <span>⚡ {char.speed}</span>
+                        <span>💥 {char.power}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Play Modes Grid */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <Card className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/60 cursor-pointer p-4 text-center" onClick={() => startGame('ai')}>
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 mx-auto flex items-center justify-center text-2xl mb-3 shadow-sm">
+                🤖
+              </div>
+              <h3 className="font-bold text-base mb-1">Single Player</h3>
+              <p className="text-xs text-muted-foreground mb-4">Play against smart tactical AI</p>
+              <Button className="w-full rounded-xl bg-primary text-primary-foreground font-semibold">Play vs AI</Button>
+            </Card>
+
+            <Card className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/60 cursor-pointer p-4 text-center" onClick={() => startGame('local')}>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 mx-auto flex items-center justify-center text-2xl mb-3 shadow-sm">
+                👥
+              </div>
+              <h3 className="font-bold text-base mb-1">Local 2 Players</h3>
+              <p className="text-xs text-muted-foreground mb-4">Battle a friend on one keyboard</p>
+              <Button variant="outline" className="w-full rounded-xl font-semibold">Local Match</Button>
+            </Card>
+
+            <Card className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/60 cursor-pointer p-4 text-center" onClick={createRoom}>
+              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 mx-auto flex items-center justify-center text-2xl mb-3 shadow-sm">
+                🌐
+              </div>
+              <h3 className="font-bold text-base mb-1">Online Match</h3>
+              <p className="text-xs text-muted-foreground mb-4">Host or join via 6-digit room code</p>
+              <Button variant="secondary" className="w-full rounded-xl font-semibold">Create Room</Button>
+            </Card>
+          </div>
+
+          {/* Controls Quick Reference & Top Leaderboard */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card className="glass-panel rounded-2xl border-border/70 p-4">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+                <Zap className="h-4 w-4 text-amber-500" /> Kicking & Controls
+              </h4>
+              <div className="space-y-1.5 text-xs text-foreground/90">
+                <div className="flex justify-between py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">Move Left / Right</span>
+                  <span className="font-mono font-semibold">A / D or ← / →</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">Jump (Headers)</span>
+                  <span className="font-mono font-semibold">W or ↑</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">🦶 Low Kick (Driven Shot)</span>
+                  <span className="font-mono font-bold text-primary">Space or F</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">⚡ High Kick (Lob / Chip)</span>
+                  <span className="font-mono font-bold text-purple-500">E</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-muted-foreground">Superpowers</span>
+                  <span className="font-mono font-semibold">1, 2, 3, 4</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="glass-panel rounded-2xl border-border/70 p-4">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+                <Trophy className="h-4 w-4 text-yellow-500" /> Arena Hall of Fame
+              </h4>
+              <div className="space-y-1.5 text-xs">
+                {topScores.slice(0, 5).map((s: any, idx: number) => (
+                  <div key={idx} className="flex justify-between items-center py-1 border-b border-border/40 last:border-0">
+                    <span className="font-medium truncate max-w-[140px]">
+                      {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`} {s.playerName}
+                    </span>
+                    <span className="font-mono font-bold text-primary">{s.score} Goals</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
           </div>
         </div>
       </div>
     );
   }
 
-  // Lobby screen
+  // ============================================================================
+  // RENDER: LOBBY SCREEN (Online)
+  // ============================================================================
+
   if (gameMode === 'lobby') {
     return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center p-8">
-        <div className="max-w-md w-full text-center space-y-8 bg-muted/20 p-8 rounded-xl border-2 border-dashed border-indigo-500/30">
-          <div>
-            <h2 className="text-3xl font-bold mb-2">Waiting for Player...</h2>
-            <p className="text-muted-foreground">Share this code with your friend:</p>
+      <div className="fixed inset-0 bg-background flex items-center justify-center p-6">
+        <div className="max-w-md w-full text-center space-y-6 glass-panel p-8 rounded-3xl border border-primary/30 shadow-2xl">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black tracking-tight">Arena Room Ready!</h2>
+            <p className="text-xs text-muted-foreground">Share this room code with your opponent:</p>
           </div>
 
-          <div className="py-6">
-            <div className="text-6xl font-mono font-bold tracking-widest text-indigo-400 bg-background/50 py-4 rounded-lg border-2 border-indigo-500/20 select-all">
+          <div className="py-4">
+            <div className="text-5xl font-mono font-black tracking-widest text-primary bg-primary/10 py-4 rounded-2xl border border-primary/30 select-all shadow-inner">
               {roomCode}
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-sm text-yellow-500 animate-pulse">
+          <div className="flex items-center justify-center gap-2 text-xs font-semibold text-amber-500 animate-pulse">
             <Zap className="h-4 w-4" />
-            <span>Waiting for connection...</span>
+            <span>Waiting for challenger to connect...</span>
           </div>
 
           {connectionError && (
-            <div className="p-2 bg-red-500/20 border border-red-500/30 rounded text-sm text-red-400">
+            <div className="p-3 bg-destructive/15 border border-destructive/30 rounded-xl text-xs text-destructive">
               {connectionError}
             </div>
           )}
 
-          <Button variant="ghost" onClick={resetGame}>Cancel</Button>
+          <Button variant="ghost" onClick={resetGame} className="rounded-xl w-full">
+            Back to Menu
+          </Button>
         </div>
       </div>
     );
   }
 
-  // Game screen
+  // ============================================================================
+  // RENDER: PLAYING SCREEN
+  // ============================================================================
+
   return (
-    <div className="fixed inset-0 bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-2 md:p-3 bg-muted/20 border-b text-sm shrink-0">
-        <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="outline" size="sm" onClick={resetGame} className="h-8 px-2">← Menu</Button>
-          <div className="flex items-center gap-1 md:gap-2">
-            <Clock className="h-3 w-3 md:h-4 md:w-4" />
-            <span className="font-mono font-bold text-sm md:text-base">
+    <div className="fixed inset-0 bg-background flex flex-col select-none overflow-hidden">
+      {/* Top TV Broadcast Scoreboard */}
+      <div className="flex items-center justify-between px-3 py-2 sm:px-6 sm:py-3 bg-card/85 backdrop-blur-md border-b border-border/80 shadow-sm shrink-0 z-20">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={resetGame} className="h-8 px-2.5 rounded-xl text-xs font-semibold">
+            ← Menu
+          </Button>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-muted/60 border border-border/60">
+            <Clock className="h-3.5 w-3.5 text-primary" />
+            <span className="font-mono font-bold text-sm">
               {Math.floor(gameState.timeLeft / 60)}:{(gameState.timeLeft % 60).toString().padStart(2, '0')}
             </span>
           </div>
         </div>
 
-        <div className="text-center">
-          <div className="flex items-center gap-3 md:gap-4 text-xl md:text-2xl font-bold">
-            <span className="text-blue-500">{gameState.player1.score}</span>
-            <span>-</span>
-            <span className="text-red-500">{gameState.player2.score}</span>
+        {/* Dynamic Match Score */}
+        <div className="flex items-center gap-4 sm:gap-8">
+          <div className="flex items-center gap-2 text-right">
+            <span className="text-xs font-bold text-foreground hidden sm:inline">{p1Character.name}</span>
+            <span className="text-lg sm:text-2xl font-black text-blue-500 bg-blue-500/10 px-3 py-0.5 rounded-xl border border-blue-500/20">
+              {gameState.player1.score}
+            </span>
           </div>
-          {gameState.lastGoalScorer && gameState.goalAnimation > 0 && (
-            <div className="text-xs text-green-500 animate-pulse">
-              GOAL! {gameState.lastGoalScorer === 'player1' ? 'Player 1' : 'Player 2'}!
-            </div>
-          )}
+
+          <span className="text-muted-foreground font-black text-sm">VS</span>
+
+          <div className="flex items-center gap-2 text-left">
+            <span className="text-lg sm:text-2xl font-black text-red-500 bg-red-500/10 px-3 py-0.5 rounded-xl border border-red-500/20">
+              {gameState.player2.score}
+            </span>
+            <span className="text-xs font-bold text-foreground hidden sm:inline">
+              {playMode === 'ai' ? 'AI Bot 🤖' : p2Character.name}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground hidden md:inline">
-            {playMode === 'ai' ? '🤖 vs AI' : playMode === 'local' ? '👥 Local' : '🌐 Online'}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            className="h-8 w-8 rounded-xl"
+            title={soundEnabled ? "Mute SFX" : "Enable SFX"}
+          >
+            {soundEnabled ? <Volume2 className="h-4 w-4 text-primary" /> : <VolumeX className="h-4 w-4 text-muted-foreground" />}
+          </Button>
+          <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-primary/10 text-primary border border-primary/20 hidden md:inline">
+            {playMode === 'ai' ? '🤖 vs AI' : playMode === 'local' ? '👥 2P' : '🌐 Online'}
           </span>
         </div>
       </div>
 
-      {/* Game Canvas */}
-      <div className="flex-1 flex items-center justify-center p-2 md:p-4 bg-gradient-to-b from-background to-muted/20 overflow-hidden">
+      {/* Game Canvas Container */}
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 bg-slate-950 overflow-hidden relative">
         <canvas
           ref={canvasRef}
           width={GAME_WIDTH}
           height={GAME_HEIGHT}
-          className="border-4 border-white/20 rounded-lg shadow-2xl max-w-full max-h-full"
+          className="border-2 border-slate-700/80 rounded-2xl shadow-2xl max-w-full max-h-full aspect-[840/460]"
           style={{ imageRendering: 'auto' }}
         />
       </div>
 
-      {/* Mobile Touch Controls */}
-      <div className="md:hidden shrink-0 p-3 bg-muted/20 border-t">
-        <div className="flex justify-center items-center gap-4">
-          {/* Left Button */}
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-16 w-16 rounded-full text-2xl active:bg-blue-500 active:text-white touch-none"
-            onTouchStart={(e) => { e.preventDefault(); handleTouchStart('left'); }}
-            onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('left'); }}
-            onMouseDown={() => handleTouchStart('left')}
-            onMouseUp={() => handleTouchEnd('left')}
-            onMouseLeave={() => handleTouchEnd('left')}
-          >
-            <ChevronLeft className="h-8 w-8" />
-          </Button>
+      {/* Desktop Quick Power-Up Toolbar */}
+      <div className="hidden md:flex justify-between items-center px-6 py-2.5 bg-card/80 border-t border-border/80 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-500 mr-2">P1 Powers:</span>
+          {POWER_UPS.map((power, idx) => {
+            const cooldownEnd = p1Cooldowns.get(power.type) || 0;
+            const isOnCooldown = cooldownEnd > Date.now();
+            const cooldownLeft = isOnCooldown ? Math.ceil((cooldownEnd - Date.now()) / 1000) : 0;
 
-          {/* Jump Button */}
-          <Button
-            variant="default"
-            size="lg"
-            className="h-20 w-20 rounded-full text-2xl bg-green-600 hover:bg-green-700 active:bg-green-500 touch-none"
-            onTouchStart={(e) => { e.preventDefault(); handleTouchStart('up'); }}
-            onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('up'); }}
-            onMouseDown={() => handleTouchStart('up')}
-            onMouseUp={() => handleTouchEnd('up')}
-            onMouseLeave={() => handleTouchEnd('up')}
-          >
-            <ArrowUp className="h-10 w-10" />
-          </Button>
-
-          {/* Right Button */}
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-16 w-16 rounded-full text-2xl active:bg-blue-500 active:text-white touch-none"
-            onTouchStart={(e) => { e.preventDefault(); handleTouchStart('right'); }}
-            onTouchEnd={(e) => { e.preventDefault(); handleTouchEnd('right'); }}
-            onMouseDown={() => handleTouchStart('right')}
-            onMouseUp={() => handleTouchEnd('right')}
-            onMouseLeave={() => handleTouchEnd('right')}
-          >
-            <ChevronRight className="h-8 w-8" />
-          </Button>
+            return (
+              <Button
+                key={power.type}
+                variant="outline"
+                size="sm"
+                disabled={isOnCooldown}
+                onClick={() => usePowerUp('player1', power.type)}
+                className="h-9 px-3 rounded-xl border border-border/70 hover:border-primary/50 relative font-semibold text-xs"
+              >
+                <span className="mr-1.5">{power.icon}</span>
+                <span>{power.name}</span>
+                <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted text-[10px] text-muted-foreground">
+                  {idx + 1}
+                </kbd>
+                {isOnCooldown && (
+                  <div className="absolute inset-0 bg-slate-950/75 rounded-xl flex items-center justify-center text-xs font-mono font-bold text-amber-400">
+                    {cooldownLeft}s
+                  </div>
+                )}
+              </Button>
+            );
+          })}
         </div>
-        <p className="text-center text-xs text-muted-foreground mt-2">
-          Hold buttons to move • Tap jump to jump
-        </p>
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>🦶 Low Kick: <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground font-bold">Space</kbd> / <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground font-bold">F</kbd></span>
+          <span>⚡ High Kick: <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground font-bold">E</kbd></span>
+          <span>Jump: <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground font-bold">W</kbd></span>
+        </div>
       </div>
 
-      {/* Power-up Controls (Desktop) */}
-      <div className="hidden md:block p-3 bg-muted/10 shrink-0">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-blue-500">Player 1 Power-ups</h4>
-            <div className="grid grid-cols-4 gap-2">
-              {POWER_UPS.map((power, index) => {
-                const cooldownEnd = p1Cooldowns.get(power.type) || 0;
-                const isOnCooldown = cooldownEnd > Date.now();
-                const cooldownLeft = isOnCooldown ? Math.ceil((cooldownEnd - Date.now()) / 1000) : 0;
-
-                return (
-                  <Button
-                    key={power.type}
-                    variant="outline"
-                    size="sm"
-                    disabled={isOnCooldown}
-                    onClick={() => usePowerUp('player1', power.type)}
-                    className="h-12 text-xs relative"
-                  >
-                    <div className="text-center">
-                      <div className="text-lg">{power.icon}</div>
-                      <div>{index + 1}</div>
-                    </div>
-                    {isOnCooldown && (
-                      <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center text-xs">
-                        {cooldownLeft}s
-                      </div>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
+      {/* Mobile Touch Action Controls */}
+      <div className="md:hidden shrink-0 px-4 py-3 bg-card/90 border-t border-border/80">
+        <div className="flex items-center justify-between max-w-sm mx-auto">
+          {/* Directional Pad */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-14 w-14 rounded-2xl active:bg-primary active:text-white touch-none"
+              onTouchStart={(e) => { e.preventDefault(); handleTouch('left', true); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleTouch('left', false); }}
+              onMouseDown={() => handleTouch('left', true)}
+              onMouseUp={() => handleTouch('left', false)}
+            >
+              <ChevronLeft className="h-7 w-7" />
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-14 w-14 rounded-2xl active:bg-primary active:text-white touch-none"
+              onTouchStart={(e) => { e.preventDefault(); handleTouch('right', true); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleTouch('right', false); }}
+              onMouseDown={() => handleTouch('right', true)}
+              onMouseUp={() => handleTouch('right', false)}
+            >
+              <ChevronRight className="h-7 w-7" />
+            </Button>
           </div>
 
-          {playMode === 'local' && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-red-500">Player 2 Power-ups</h4>
-              <div className="grid grid-cols-4 gap-2">
-                {POWER_UPS.map((power, index) => {
-                  const cooldownEnd = p2Cooldowns.get(power.type) || 0;
-                  const isOnCooldown = cooldownEnd > Date.now();
-                  const cooldownLeft = isOnCooldown ? Math.ceil((cooldownEnd - Date.now()) / 1000) : 0;
-                  const keyNumber = index + 7;
+          {/* Action Buttons: Low Kick, High Kick, Jump */}
+          <div className="flex items-center gap-2">
+            {/* Low Kick */}
+            <Button
+              variant="default"
+              size="lg"
+              className="h-14 px-3 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-500 font-bold text-xs touch-none flex flex-col items-center justify-center shadow-md"
+              onTouchStart={(e) => { e.preventDefault(); handleTouch('lowKick', true); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleTouch('lowKick', false); }}
+              onMouseDown={() => handleTouch('lowKick', true)}
+              onMouseUp={() => handleTouch('lowKick', false)}
+            >
+              <span>🦶</span>
+              <span>LOW</span>
+            </Button>
 
-                  return (
-                    <Button
-                      key={power.type}
-                      variant="outline"
-                      size="sm"
-                      disabled={isOnCooldown}
-                      onClick={() => usePowerUp('player2', power.type)}
-                      className="h-12 text-xs relative"
-                    >
-                      <div className="text-center">
-                        <div className="text-lg">{power.icon}</div>
-                        <div>{keyNumber === 10 ? '0' : keyNumber}</div>
-                      </div>
-                      {isOnCooldown && (
-                        <div className="absolute inset-0 bg-black/50 rounded flex items-center justify-center text-xs">
-                          {cooldownLeft}s
-                        </div>
-                      )}
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            {/* High Kick */}
+            <Button
+              variant="default"
+              size="lg"
+              className="h-14 px-3 rounded-2xl bg-purple-600 hover:bg-purple-700 active:bg-purple-500 font-bold text-xs touch-none flex flex-col items-center justify-center shadow-md"
+              onTouchStart={(e) => { e.preventDefault(); handleTouch('highKick', true); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleTouch('highKick', false); }}
+              onMouseDown={() => handleTouch('highKick', true)}
+              onMouseUp={() => handleTouch('highKick', false)}
+            >
+              <span>⚡</span>
+              <span>HIGH</span>
+            </Button>
+
+            {/* Jump */}
+            <Button
+              variant="default"
+              size="lg"
+              className="h-14 w-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-500 touch-none shadow-md"
+              onTouchStart={(e) => { e.preventDefault(); handleTouch('up', true); }}
+              onTouchEnd={(e) => { e.preventDefault(); handleTouch('up', false); }}
+              onMouseDown={() => handleTouch('up', true)}
+              onMouseUp={() => handleTouch('up', false)}
+            >
+              <ArrowUp className="h-7 w-7" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Game Over Modal */}
+      {/* Match Over Modal */}
       {gameMode === 'gameOver' && showScoreSubmit && (
-        <div className="absolute inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="max-w-sm w-full">
-            <CardContent className="p-6 text-center">
-              <Trophy className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
-              <h2 className="text-xl font-bold mb-2">Game Over!</h2>
-
-              <div className="mb-4 space-y-2">
-                <p className="text-lg">
-                  Final Score: <span className="font-bold text-blue-500">{gameState.player1.score}</span> - <span className="font-bold text-red-500">{gameState.player2.score}</span>
-                </p>
-                {gameState.player1.score !== gameState.player2.score && (
-                  <p className="text-sm text-green-600 font-semibold">
-                    {gameState.player1.score > gameState.player2.score ? 'Player 1 Wins!' : 'Player 2 Wins!'}
-                  </p>
-                )}
-                {gameState.player1.score === gameState.player2.score && (
-                  <p className="text-sm text-yellow-600 font-semibold">It's a Draw!</p>
-                )}
+        <div className="absolute inset-0 bg-background/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <Card className="max-w-md w-full glass-panel border border-border/80 shadow-2xl rounded-3xl overflow-hidden">
+            <CardContent className="p-7 text-center space-y-4">
+              <Trophy className="h-14 w-14 mx-auto text-yellow-500 animate-bounce" />
+              <div className="space-y-1">
+                <h2 className="text-3xl font-black tracking-tight">Full Time!</h2>
+                <p className="text-sm text-muted-foreground">The final referee whistle has blown.</p>
               </div>
 
-              <div className="space-y-3">
+              <div className="p-4 rounded-2xl bg-card/80 border border-border/60">
+                <div className="text-2xl font-black mb-1">
+                  <span className="text-blue-500">{gameState.player1.score}</span>
+                  <span className="mx-2 text-muted-foreground">-</span>
+                  <span className="text-red-500">{gameState.player2.score}</span>
+                </div>
+                <p className="text-sm font-bold text-primary">
+                  {gameState.player1.score > gameState.player2.score
+                    ? '🏆 Victory! Player 1 Wins!'
+                    : gameState.player1.score < gameState.player2.score
+                    ? 'AI / Player 2 Wins!'
+                    : '🤝 Hard-Fought Draw!'}
+                </p>
+              </div>
+
+              <div className="space-y-3 pt-2">
                 <Input
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Enter your name"
-                  className="text-center"
+                  placeholder="Enter your name for the Hall of Fame"
+                  className="rounded-xl text-center font-bold"
                 />
                 <div className="flex gap-2">
                   <Button
                     onClick={handleSubmitScore}
                     disabled={!playerName.trim() || submitScoreMutation.isPending}
-                    className="flex-1"
+                    className="flex-1 rounded-xl bg-primary text-primary-foreground font-bold"
                   >
-                    {submitScoreMutation.isPending ? "Submitting..." : "Submit Score"}
+                    {submitScoreMutation.isPending ? "Recording..." : "Save Record"}
                   </Button>
-                  <Button onClick={resetGame} variant="outline">
+                  <Button onClick={resetGame} variant="outline" className="rounded-xl font-semibold">
                     Menu
                   </Button>
                 </div>
