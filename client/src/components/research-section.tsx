@@ -82,13 +82,13 @@ const globalConferences: ResearchItem[] = [
   },
   {
     title: "COP30 – United Nations Climate Change Conference",
-    role: "Virtual Participant & Tech Delegate",
+    role: "Virtual Delegate",
     organization: "United Nations (UNFCCC) / COP30",
     period: "10–21 Nov 2025",
-    location: "Belém, Brazil (Virtual)",
+    location: "Belem, Brasil",
     description:
       "Participated virtually in the global climate summit, contributing to digital technology dialogues, green IT solutions, and international youth advocacy.",
-    tag: "COP30 Virtual Delegate",
+    tag: "Virtual Delegate",
   },
   {
     title: "International Youth & Technology Program",
@@ -114,7 +114,7 @@ const globalConferences: ResearchItem[] = [
     title: "European Youth Development Project",
     role: "Project Participant",
     organization: "Slovenian National Agency (MOVIT)",
-    period: "21 March 2024 to 12 Sep 2024",
+    period: "21 March - 12 Sep 2024",
     location: "Slovenia",
     description:
       "Participated in European activities focused on youth development, digital competencies, collaboration frameworks, and agile project coordination.",
