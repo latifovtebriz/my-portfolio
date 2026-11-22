@@ -47,16 +47,6 @@ const scientificResearches: ResearchItem[] = [
       "Published academic research examining LLM evolutionary trajectories, cognitive symbiosis between human developers and AI assistants, and future job market impact.",
     tag: "AI & Society",
   },
-  {
-    title: "Virtual Delegate for COP30 Brazil",
-    role: "Virtual Delegate",
-    organization: "United Nations",
-    period: "Nov 2025 – Dec 2025",
-    location: "Brazil (Virtual)",
-    description:
-      "Represented technological and digital perspectives in international climate negotiations, advocating for green IT, efficient cloud architectures, and AI-driven sustainability tools.",
-    tag: "Global Delegation",
-  },
 ];
 
 const globalConferences: ResearchItem[] = [
@@ -64,47 +54,67 @@ const globalConferences: ResearchItem[] = [
     title: "XX International Tool Fair – GREEN FUTURE: Tools for Sustainable Transformation",
     role: "Tool Facilitator",
     organization: "International Tool Fair Community",
-    period: "Oct 2026",
+    period: "19–23 Oct 2026",
     location: "Sopot, Poland",
     description:
-      "Participated in the 20th edition of the cross-sectoral community-of-practice event gathering diverse organisations and project leaders across Europe and beyond. Engaged in discussions, peer-to-peer learning, and sessions focused on Education for Sustainable Development (ESD) tools, green transition, and innovative methodological approaches.",
+      "Participated in the 20th edition of the cross-sectoral event in Europe, focusing on sustainable development tools, green transition, and educational innovation.",
     tag: "Tool Facilitator",
   },
   {
     title: "Mindful Impact: Strengthening Youth Work From Within",
     role: "International Participant",
     organization: "Erasmus+ Training Course",
-    period: "Sep 2026",
+    period: "14–20 Sep 2026",
     location: "Kobuleti, Georgia",
     description:
-      "Participated in an intensive international training focused on well-being, resilience, personal development, and sustainable youth work practices. Engaged in non-formal learning and practical methodologies for maximizing impact.",
+      "Participated in an intensive international training focused on resilience, well-being, sustainable youth work practices, and practical non-formal methodologies.",
     tag: "Erasmus+",
   },
   {
     title: "Cool Facilitators",
     role: "International Participant & Facilitator",
     organization: "Erasmus+ Training Course",
-    period: "18–27 May 2026",
+    period: "18–25 May 2026",
     location: "Mezőberény, Hungary",
     description:
-      "Explored the ethical integration of AI and digital tools into youth exchanges and non-formal educational activities. Co-designed human-centered and participatory digital methodologies with an international facilitator network.",
+      "Explored the ethical integration of AI and digital tools into youth exchanges and non-formal education with an international facilitator network.",
     tag: "Ethical AI & Erasmus+",
+  },
+  {
+    title: "COP30 – United Nations Climate Change Conference",
+    role: "Virtual Participant & Tech Delegate",
+    organization: "United Nations (UNFCCC) / COP30",
+    period: "10–21 Nov 2025",
+    location: "Belém, Brazil (Virtual)",
+    description:
+      "Participated virtually in the global climate summit, contributing to digital technology dialogues, green IT solutions, and international youth advocacy.",
+    tag: "COP30 Virtual Delegate",
   },
   {
     title: "International Youth & Technology Program",
     role: "Tech Delegate",
     organization: "European Solidarity Corps (ESC) & Turkish Federation",
-    period: "Aug 2025 – Sep 2025",
+    period: "30 Aug – 17 Sep 2025",
     location: "Ankara, Türkiye",
     description:
       "Engaged in international technology programs, leadership development, cross-cultural collaboration, and digital youth empowerment initiatives.",
     tag: "ESC Program",
   },
   {
+    title: "COP29 – United Nations Climate Change Conference",
+    role: "Azerbaijan Delegate & ICT Onsite Support Technician",
+    organization: "United Nations (UNFCCC) / COP29",
+    period: "11–22 Nov 2024",
+    location: "Baku, Azerbaijan",
+    description:
+      "Represented Azerbaijan at COP29 while delivering critical on-site ICT technical infrastructure support, networking, and digital systems for global delegations.",
+    tag: "COP29 Delegate & ICT",
+  },
+  {
     title: "European Youth Development Project",
     role: "Project Participant",
     organization: "Slovenian National Agency (MOVIT)",
-    period: "Aug 2024 – Sep 2024",
+    period: "21 March 2024 to 12 Sep 2024",
     location: "Slovenia",
     description:
       "Participated in European activities focused on youth development, digital competencies, collaboration frameworks, and agile project coordination.",
@@ -150,7 +160,7 @@ export function ResearchConferencesSection() {
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Key Projects & Scientific Research</h3>
                 </div>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {scientificResearches.map((res, index) => (
                     <Card key={index} className="glass-panel card-hover-effect rounded-2xl border-border/70 hover:border-primary/50 transition-all">
                       <CardContent className="p-6 sm:p-7">
@@ -208,7 +218,7 @@ export function ResearchConferencesSection() {
                         <p className="text-xs text-muted-foreground mb-3.5 flex items-center gap-1.5 flex-wrap">
                           <MapPin className="h-3 w-3 inline text-muted-foreground/80" /> {conf.location} • {conf.role}
                         </p>
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
+                        <p className="text-xs text-muted-foreground leading-relaxed">
                           {conf.description}
                         </p>
                       </CardContent>
